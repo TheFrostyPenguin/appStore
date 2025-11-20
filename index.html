@@ -1,0 +1,975 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Enterprise Application Manager</title>
+  <link rel="icon" href="data:," />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg: #0f172a;
+      --panel: #111827;
+      --muted: #9ca3af;
+      --primary: #38bdf8;
+      --success: #22c55e;
+      --warning: #eab308;
+      --surface: #1f2937;
+      --border: #2f3646;
+      --radius: 12px;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      font-family: 'Inter', system-ui, -apple-system, sans-serif;
+      background: radial-gradient(circle at 10% 20%, rgba(56, 189, 248, 0.12), transparent 25%),
+        radial-gradient(circle at 90% 10%, rgba(139, 92, 246, 0.12), transparent 20%),
+        var(--bg);
+      color: #e5e7eb;
+      min-height: 100vh;
+    }
+
+    header {
+      padding: 24px 32px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      position: sticky;
+      top: 0;
+      backdrop-filter: blur(16px);
+      background: rgba(15, 23, 42, 0.75);
+      border-bottom: 1px solid var(--border);
+      z-index: 10;
+    }
+
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+    }
+
+    .logo-badge {
+      width: 40px;
+      height: 40px;
+      border-radius: 10px;
+      background: linear-gradient(135deg, #38bdf8, #a78bfa);
+      display: grid;
+      place-items: center;
+      font-weight: 800;
+      color: #0b1221;
+    }
+
+    main {
+      padding: 24px 32px 48px;
+      display: grid;
+      grid-template-columns: 320px 1fr;
+      gap: 24px;
+    }
+
+    @media (max-width: 1024px) {
+      main {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .panel {
+      background: linear-gradient(180deg, rgba(31, 41, 55, 0.95), rgba(17, 24, 39, 0.95));
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 18px 20px;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+    }
+
+    h2 {
+      margin: 0 0 12px;
+      font-size: 20px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    h3 { margin: 12px 0 10px; }
+
+    label { display: block; color: var(--muted); margin-bottom: 6px; font-size: 14px; }
+
+    input, select, textarea {
+      width: 100%;
+      padding: 10px 12px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      color: #f9fafb;
+      font-size: 14px;
+      transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    input:focus, select:focus, textarea:focus {
+      outline: none;
+      border-color: #38bdf8;
+      box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.15);
+    }
+
+    textarea { resize: vertical; min-height: 80px; }
+
+    .button {
+      border: none;
+      border-radius: 10px;
+      padding: 10px 14px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: transform 0.1s ease, box-shadow 0.2s ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .button.primary {
+      background: linear-gradient(135deg, #38bdf8, #22d3ee);
+      color: #0b1221;
+      box-shadow: 0 10px 30px rgba(56, 189, 248, 0.3);
+    }
+
+    .button.ghost { background: transparent; color: #e5e7eb; border: 1px solid var(--border); }
+
+    .button:hover { transform: translateY(-1px); }
+
+    .button:active { transform: translateY(0); }
+
+    .pill {
+      padding: 6px 10px;
+      border-radius: 999px;
+      background: rgba(56, 189, 248, 0.12);
+      border: 1px solid rgba(56, 189, 248, 0.25);
+      color: #e0f2fe;
+      font-weight: 600;
+      font-size: 12px;
+    }
+
+    .grid { display: grid; gap: 12px; }
+
+    .app-card {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 16px;
+      padding: 18px;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      background: linear-gradient(135deg, rgba(31, 41, 55, 0.85), rgba(17, 24, 39, 0.9));
+    }
+
+    .card-meta { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; color: var(--muted); font-size: 13px; }
+
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+      gap: 12px;
+      margin-top: 12px;
+    }
+
+    .stat {
+      padding: 12px;
+      border-radius: 10px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+    }
+
+    .stat strong { display: block; font-size: 18px; }
+    .stat span { color: var(--muted); font-size: 13px; }
+
+    .tag-row { display: flex; gap: 8px; flex-wrap: wrap; margin: 8px 0; }
+    .usage-tag {
+      padding: 6px 8px;
+      border-radius: 8px;
+      border: 1px dashed rgba(236, 72, 153, 0.4);
+      color: #fbcfe8;
+      background: rgba(236, 72, 153, 0.08);
+      font-size: 12px;
+    }
+
+    .alert { padding: 10px 12px; border-radius: 10px; font-size: 14px; }
+    .alert.info { background: rgba(56, 189, 248, 0.08); border: 1px solid rgba(56, 189, 248, 0.2); }
+    .alert.warn { background: rgba(234, 179, 8, 0.08); border: 1px solid rgba(234, 179, 8, 0.2); color: #fef9c3; }
+
+    .divider { border-top: 1px solid var(--border); margin: 16px 0; }
+
+    .chart-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 16px;
+      margin-top: 12px;
+    }
+
+    .badge { background: rgba(34, 197, 94, 0.12); color: #bbf7d0; padding: 4px 8px; border-radius: 6px; font-weight: 600; font-size: 12px; }
+
+    .auth-overlay {
+      max-width: 720px;
+      margin: 60px auto;
+      background: linear-gradient(160deg, rgba(31, 41, 55, 0.95), rgba(17, 24, 39, 0.95));
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 28px;
+      box-shadow: 0 30px 80px rgba(0, 0, 0, 0.45);
+    }
+
+    .flex-row { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
+  </style>
+</head>
+<body>
+  <div id="root"></div>
+
+  <script src="/config.js"></script>
+  <script src="https://unpkg.com/react@18/umd/react.development.js" crossorigin></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js" crossorigin></script>
+  <script src="https://unpkg.com/babel-standalone@6/babel.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+  <script type="text/babel" data-presets="react">
+    const { useMemo, useState, useEffect, useRef } = React;
+
+    const seedApps = [
+      {
+        id: 'telemetry-uploader',
+        name: 'Telemetry Uploader',
+        category: 'Monitoring',
+        store: 'Field Ops',
+        tags: ['IoT', 'Telemetry'],
+        description: 'Secure agent used to upload device telemetry from field units to the central analytics store.',
+        downloads: 189,
+        rating: 4.3,
+        ratingCount: 6,
+        feedback: [
+          { persona: 'viewer', comment: 'Expose retry metrics via metrics endpoint.', user: 'Hakeem', createdAt: new Date().toISOString() },
+          { persona: 'admin', comment: 'Scheduled vault rotation in May release.', user: 'Ops Admin', createdAt: new Date().toISOString() },
+        ],
+        updateInfo: 'v3.2.1 – Offline queue with retry',
+        lastUpdated: '2024-03-12',
+        downloadUrl: '#',
+      },
+      {
+        id: 'secure-docs',
+        name: 'Secure Docs',
+        category: 'Productivity',
+        store: 'Core',
+        tags: ['Compliance', 'Docs'],
+        description: 'Encrypted internal documentation hub with granular RBAC support and watermarking.',
+        downloads: 243,
+        rating: 4.0,
+        ratingCount: 5,
+        feedback: [
+          { persona: 'viewer', comment: 'Add dark mode toggle for readability.', user: 'Mia', createdAt: new Date().toISOString() },
+        ],
+        updateInfo: 'v2.4.0 – Watermarked PDFs',
+        lastUpdated: '2024-05-08',
+        downloadUrl: '#',
+      },
+      {
+        id: 'release-portal',
+        name: 'Release Portal',
+        category: 'DevOps',
+        store: 'Engineering',
+        tags: ['Deploy', 'Sign-offs'],
+        description: 'One-click deployment portal for staging and production with signed artifact verification.',
+        downloads: 122,
+        rating: 4.8,
+        ratingCount: 4,
+        feedback: [
+          { persona: 'viewer', comment: 'Surface feature flags per environment.', user: 'Kai', createdAt: new Date().toISOString() },
+        ],
+        updateInfo: 'v1.8.6 – Canary automation',
+        lastUpdated: '2024-04-01',
+        downloadUrl: '#',
+      },
+    ];
+
+    const personaOptions = [
+      { value: 'viewer', label: 'Viewer' },
+      { value: 'admin', label: 'Admin' },
+    ];
+
+    const average = (values = []) => values.length ? values.reduce((a, b) => a + b, 0) / values.length : 0;
+
+    const config = window.APP_CONFIG || {};
+    const supabaseClient = config.supabaseUrl && config.supabaseAnonKey ? window.supabase.createClient(config.supabaseUrl, config.supabaseAnonKey) : null;
+
+    const App = () => {
+      const [session, setSession] = useState(null);
+      const [persona, setPersona] = useState('viewer');
+      const [apps, setApps] = useState([]);
+      const [filters, setFilters] = useState({ search: '', category: 'all', store: 'all', sort: 'name' });
+      const [newApp, setNewApp] = useState({ name: '', category: 'Monitoring', store: 'Core', description: '', tags: '', downloadUrl: '' });
+      const [rating, setRating] = useState(5);
+      const [comment, setComment] = useState('');
+      const [selectedAppId, setSelectedAppId] = useState(null);
+      const [categories, setCategories] = useState(['all']);
+      const [stores, setStores] = useState(['all']);
+      const [stats, setStats] = useState({ totalDownloads: 0, averageRating: 0, categoryBreakdown: {}, appCount: 0 });
+      const [alert, setAlert] = useState('');
+
+      const feedback = {
+        rating,
+        comment,
+        setRating,
+        setComment,
+        reset: () => {
+          setRating(5);
+          setComment('');
+        },
+      };
+
+      useEffect(() => {
+        loadData();
+      }, []);
+
+      async function loadData() {
+        try {
+          const [appsRes, categoriesRes, storesRes, statsRes] = await Promise.all([
+            fetch('/api/apps'),
+            fetch('/api/categories'),
+            fetch('/api/stores'),
+            fetch('/api/stats'),
+          ]);
+
+          if (!appsRes.ok) throw new Error('Apps fetch failed');
+          const appsPayload = await appsRes.json();
+          setApps(Array.isArray(appsPayload.apps) ? appsPayload.apps : []);
+          setSelectedAppId(appsPayload.apps?.[0]?.id || null);
+
+          if (!categoriesRes.ok) throw new Error('Categories fetch failed');
+          const categoriesPayload = await categoriesRes.json();
+          setCategories(['all', ...(Array.isArray(categoriesPayload.categories) ? categoriesPayload.categories : [])]);
+
+          if (!storesRes.ok) throw new Error('Stores fetch failed');
+          const storesPayload = await storesRes.json();
+          setStores(['all', ...(Array.isArray(storesPayload.stores) ? storesPayload.stores : [])]);
+
+          if (!statsRes.ok) throw new Error('Stats fetch failed');
+          const statsPayload = await statsRes.json();
+          setStats({
+            totalDownloads: statsPayload.totalDownloads || 0,
+            averageRating: statsPayload.averageRating || 0,
+            categoryBreakdown: statsPayload.categoryBreakdown || {},
+            appCount: statsPayload.appCount || 0,
+          });
+
+          setAlert('Connected to Supabase backend.');
+        } catch (err) {
+          setAlert('Backend unreachable. Check Supabase credentials, run the server, and ensure the database is seeded.');
+        }
+      }
+
+      const filteredApps = useMemo(() => {
+        const searchLower = filters.search.toLowerCase();
+        const filtered = apps.filter((app) => {
+          const matchesSearch =
+            app.name.toLowerCase().includes(searchLower) ||
+            (app.description || '').toLowerCase().includes(searchLower) ||
+            (app.tags || []).some((f) => f.toLowerCase().includes(searchLower));
+          const matchesCategory = filters.category === 'all' || app.category === filters.category;
+          const matchesStore = filters.store === 'all' || (app.store || '').toLowerCase() === filters.store.toLowerCase();
+          return matchesSearch && matchesCategory && matchesStore;
+        });
+
+        switch (filters.sort) {
+          case 'downloads':
+            return [...filtered].sort((a, b) => (b.downloads || 0) - (a.downloads || 0));
+          case 'rating':
+            return [...filtered].sort((a, b) => (b.rating || 0) - (a.rating || 0));
+          case 'updated':
+            return [...filtered].sort((a, b) => new Date(b.lastUpdated || 0) - new Date(a.lastUpdated || 0));
+          default:
+            return [...filtered].sort((a, b) => a.name.localeCompare(b.name));
+        }
+      }, [apps, filters]);
+
+      const selectedApp = apps.find((a) => a.id === selectedAppId) || filteredApps[0];
+
+      const handleAddApp = async (e) => {
+        e.preventDefault();
+        if (!newApp.name.trim() || !newApp.description.trim()) return;
+        const slug = newApp.name.trim().toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '') || `app-${Date.now()}`;
+
+        const payload = {
+          id: slug,
+          name: newApp.name.trim(),
+          category: newApp.category,
+          store: newApp.store,
+          description: newApp.description.trim(),
+          tags: newApp.tags.split(',').map((s) => s.trim()).filter(Boolean),
+          downloadUrl: newApp.downloadUrl || '#',
+          updateInfo: '',
+        };
+
+        try {
+          const res = await fetch('/api/apps', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'x-user-role': persona,
+            },
+            body: JSON.stringify(payload),
+          });
+
+          if (!res.ok) {
+            throw new Error('Unable to create app');
+          }
+
+          const app = await res.json();
+          setApps((prev) => [app, ...prev]);
+          setNewApp({ name: '', category: 'Monitoring', store: 'Core', description: '', tags: '', downloadUrl: '' });
+          setSelectedAppId(app.id);
+          setAlert('App saved to Supabase.');
+        } catch (err) {
+          setAlert('Unable to save to API. Please confirm the server can reach Supabase.');
+        }
+      };
+
+      const handleFeedback = async (e, appId) => {
+        e.preventDefault();
+        setApps((prev) =>
+          prev.map((app) =>
+            app.id === appId
+              ? {
+                  ...app,
+                  ratingCount: (app.ratingCount || 0) + 1,
+                  rating: Number((((app.rating || 0) * (app.ratingCount || 0) + rating) / ((app.ratingCount || 0) + 1)).toFixed(2)),
+                  feedback: comment.trim()
+                    ? [...(app.feedback || []), { persona, comment: comment.trim(), user: session?.user?.email || 'anonymous', createdAt: new Date().toISOString() }]
+                    : app.feedback,
+                }
+              : app
+          )
+        );
+
+        try {
+          await fetch(`/api/apps/${appId}/rate`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ rating, comment, user: session?.user?.email || 'anonymous', persona }),
+          });
+          if (comment.trim()) {
+            await fetch(`/api/apps/${appId}/feedback`, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ comment, user: session?.user?.email || 'anonymous', persona }),
+            });
+          }
+        } catch (err) {
+          setAlert('Feedback could not be saved. Check Supabase connectivity.');
+        }
+
+        feedback.reset();
+      };
+
+      const handleDownload = async (appId) => {
+        setApps((prev) => prev.map((app) => (app.id === appId ? { ...app, downloads: (app.downloads || 0) + 1 } : app)));
+        try {
+          await fetch(`/api/apps/${appId}/download`, { method: 'POST' });
+        } catch (err) {
+          setAlert('Could not record the download. Verify Supabase connectivity.');
+        }
+      };
+
+      const computedStats = useMemo(() => {
+        const totalDownloads = apps.reduce((sum, app) => sum + (app.downloads || 0), 0);
+        const ratingSum = apps.reduce((sum, app) => sum + (app.rating || 0) * (app.ratingCount || 0), 0);
+        const ratingCount = apps.reduce((sum, app) => sum + (app.ratingCount || 0), 0);
+        const avgRating = ratingCount ? Number((ratingSum / ratingCount).toFixed(2)) : 0;
+        return {
+          totalDownloads: stats.totalDownloads || totalDownloads,
+          averageRating: stats.averageRating || avgRating,
+          categoryBreakdown: Object.keys(stats.categoryBreakdown || {}).length ? stats.categoryBreakdown : apps.reduce((map, app) => {
+            map[app.category] = (map[app.category] || 0) + 1;
+            return map;
+          }, {}),
+          appCount: stats.appCount || apps.length,
+        };
+      }, [apps, stats]);
+
+      const supabaseReady = Boolean(supabaseClient);
+
+      if (!session) {
+        return (
+          <div style={{ padding: '40px 22px' }}>
+            <AuthGate
+              supabaseReady={supabaseReady}
+              supabaseUrl={config.supabaseUrl}
+              onLogin={setSession}
+              setPersona={setPersona}
+            />
+          </div>
+        );
+      }
+
+      return (
+        <React.Fragment>
+          <header>
+            <div className="logo">
+              <div className="logo-badge">EA</div>
+              <div>
+                Enterprise Application Manager
+                <div style={{ color: 'var(--muted)', fontWeight: 500, fontSize: 13 }}>Supabase-connected • Secure discovery</div>
+              </div>
+            </div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+              <span className="pill" style={{ background: persona === 'admin' ? 'rgba(34, 197, 94, 0.12)' : 'rgba(56, 189, 248, 0.12)', color: persona === 'admin' ? '#bbf7d0' : '#e0f2fe' }}>
+                {persona.charAt(0).toUpperCase() + persona.slice(1)} persona
+              </span>
+              <button className="button ghost" onClick={() => setSession(null)}>Logout</button>
+            </div>
+          </header>
+
+          <main>
+            <Controls
+              persona={persona}
+              setPersona={setPersona}
+              filters={filters}
+              setFilters={setFilters}
+              categories={categories}
+              stores={stores}
+              newApp={newApp}
+              setNewApp={setNewApp}
+              onAddApp={handleAddApp}
+              stats={computedStats}
+              alert={alert}
+            />
+            <Catalog
+              persona={persona}
+              apps={filteredApps}
+              allApps={apps}
+              selectedAppId={selectedAppId}
+              onSelectApp={setSelectedAppId}
+              onDownload={handleDownload}
+              onFeedback={handleFeedback}
+              feedback={feedback}
+            />
+          </main>
+        </React.Fragment>
+      );
+    };
+
+    const AuthGate = ({ supabaseReady, supabaseUrl, onLogin, setPersona }) => {
+      const [email, setEmail] = useState('admin@example.com');
+      const [password, setPassword] = useState('SuperSecret123!');
+      const [status, setStatus] = useState('');
+
+      const handleSupabaseLogin = async (e) => {
+        e.preventDefault();
+        if (!supabaseReady) {
+          setStatus('Supabase is not configured. Set SUPABASE_URL and SUPABASE_ANON_KEY.');
+          return;
+        }
+        setStatus('Signing in with Supabase...');
+        const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password });
+        if (error) {
+          setStatus(error.message);
+          return;
+        }
+        const userRole = data?.user?.app_metadata?.role || data?.user?.user_metadata?.role || 'viewer';
+        setPersona(userRole);
+        onLogin({ user: data.user, token: data.session?.access_token, role: userRole, provider: 'supabase' });
+        setStatus('');
+      };
+
+      if (!supabaseReady) {
+        return (
+          <div className="auth-overlay">
+            <div className="panel" style={{ padding: 16 }}>
+              <h3 style={{ marginTop: 0 }}>Supabase configuration required</h3>
+              <p style={{ color: 'var(--muted)' }}>
+                Set <strong>SUPABASE_URL</strong> and <strong>SUPABASE_ANON_KEY</strong> in your backend environment, restart the server, and refresh this page.
+              </p>
+              <p style={{ color: 'var(--muted)' }}>Project URL (from env): {supabaseUrl || 'not set'}</p>
+            </div>
+          </div>
+        );
+      }
+
+      return (
+        <div className="auth-overlay">
+          <div className="flex-row" style={{ justifyContent: 'space-between' }}>
+            <div className="logo" style={{ marginBottom: 6 }}>
+              <div className="logo-badge">EA</div>
+              <div>
+                Enterprise Application Manager
+                <div style={{ color: 'var(--muted)', fontWeight: 500, fontSize: 13 }}>Supabase login</div>
+              </div>
+            </div>
+            <span className="pill" style={{ background: 'rgba(34, 197, 94, 0.12)', color: '#bbf7d0' }}>
+              Supabase connected
+            </span>
+          </div>
+
+          <p style={{ color: 'var(--muted)', marginTop: 0 }}>
+            Sign in with Supabase credentials (email/password). Roles come from user metadata.<br />
+            Admins can add apps; viewers can browse and rate.
+          </p>
+
+          <div className="panel" style={{ padding: 16 }}>
+            <h3 style={{ marginTop: 0 }}>Supabase email/password</h3>
+            <form className="grid" style={{ gap: 10 }} onSubmit={handleSupabaseLogin}>
+              <div>
+                <label>Email</label>
+                <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="you@company.com" required />
+              </div>
+              <div>
+                <label>Password</label>
+                <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="••••••••" required />
+              </div>
+              <div className="flex-row" style={{ justifyContent: 'space-between' }}>
+                <span style={{ color: 'var(--muted)', fontSize: 13 }}>Project URL: {supabaseUrl}</span>
+                <button type="submit" className="button primary">Login with Supabase</button>
+              </div>
+            </form>
+            {status && <div className="alert warn" style={{ marginTop: 12 }}>{status}</div>}
+          </div>
+        </div>
+      );
+    };
+
+    const Controls = ({ persona, setPersona, filters, setFilters, categories, stores, newApp, setNewApp, onAddApp, stats, alert }) => {
+      const handleChange = (field) => (e) => setNewApp((prev) => ({ ...prev, [field]: e.target.value }));
+
+      return (
+        <div className="grid" style={{ gap: 16 }}>
+          <div className="panel" style={{ padding: 0 }}>
+            <div style={{ padding: '16px 18px', borderBottom: '1px solid var(--border)' }}>
+              <h2>Controls</h2>
+            </div>
+            <div style={{ padding: '14px 18px' }}>
+              <div className="grid" style={{ gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+                <div>
+                  <label>Persona</label>
+                  <select value={persona} onChange={(e) => setPersona(e.target.value)}>
+                    {personaOptions.map((option) => (
+                      <option key={option.value} value={option.value}>
+                        {option.label}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+                <div>
+                  <label>Sort</label>
+                  <select value={filters.sort} onChange={(e) => setFilters((prev) => ({ ...prev, sort: e.target.value }))}>
+                    <option value="name">Alphabetical</option>
+                    <option value="downloads">Downloads</option>
+                    <option value="rating">Rating</option>
+                    <option value="updated">Last updated</option>
+                  </select>
+                </div>
+              </div>
+              <div className="grid" style={{ gridTemplateColumns: '1fr 1fr', gap: 12, marginTop: 8 }}>
+                <div>
+                  <label>Category filter</label>
+                  <select value={filters.category} onChange={(e) => setFilters((prev) => ({ ...prev, category: e.target.value }))}>
+                    {categories.map((c) => (
+                      <option key={c} value={c}>
+                        {c === 'all' ? 'All categories' : c}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+                <div>
+                  <label>Store filter</label>
+                  <select value={filters.store} onChange={(e) => setFilters((prev) => ({ ...prev, store: e.target.value }))}>
+                    {stores.map((s) => (
+                      <option key={s} value={s}>
+                        {s === 'all' ? 'All stores' : s}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+              <label style={{ marginTop: 12 }}>Search</label>
+              <input
+                placeholder="Search by name, description, or tag"
+                value={filters.search}
+                onChange={(e) => setFilters((prev) => ({ ...prev, search: e.target.value }))}
+              />
+            </div>
+            <div className="divider" />
+            <div style={{ padding: '14px 18px' }}>
+              <h3 style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 0 }}>
+                Stats
+                <span className="badge">Live</span>
+              </h3>
+              <div className="stats">
+                <div className="stat">
+                  <strong>{stats.totalDownloads}</strong>
+                  <span>Total downloads</span>
+                </div>
+                <div className="stat">
+                  <strong>{stats.appCount}</strong>
+                  <span>Applications</span>
+                </div>
+                <div className="stat">
+                  <strong>{Number.isFinite(stats.averageRating) && stats.averageRating > 0 ? stats.averageRating.toFixed(1) : 'N/A'}</strong>
+                  <span>Overall rating</span>
+                </div>
+              </div>
+              {alert && <div className="alert warn" style={{ marginTop: 10 }}>{alert}</div>}
+            </div>
+          </div>
+
+          {persona === 'admin' && (
+            <div className="panel">
+              <h2>Admin • Add application</h2>
+              <form className="grid" style={{ gap: 10 }} onSubmit={onAddApp}>
+                <div>
+                  <label>Name</label>
+                  <input value={newApp.name} onChange={handleChange('name')} placeholder="e.g., Compliance Toolkit" required />
+                </div>
+                <div className="grid" style={{ gridTemplateColumns: '1fr 1fr', gap: 10 }}>
+                  <div>
+                    <label>Category</label>
+                    <select value={newApp.category} onChange={handleChange('category')}>
+                      {categories.filter((c) => c !== 'all').map((c) => (
+                        <option key={c}>{c}</option>
+                      ))}
+                    </select>
+                  </div>
+                  <div>
+                    <label>Store</label>
+                    <select value={newApp.store} onChange={handleChange('store')}>
+                      {stores.filter((s) => s !== 'all').map((s) => (
+                        <option key={s}>{s}</option>
+                      ))}
+                    </select>
+                  </div>
+                </div>
+                <div>
+                  <label>Description</label>
+                  <textarea value={newApp.description} onChange={handleChange('description')} placeholder="What problem does it solve?" required />
+                </div>
+                <div>
+                  <label>Tags (comma separated)</label>
+                  <input value={newApp.tags} onChange={handleChange('tags')} placeholder="Compliance, Finance" />
+                </div>
+                <div>
+                  <label>Download URL</label>
+                  <input value={newApp.downloadUrl} onChange={handleChange('downloadUrl')} placeholder="https://..." />
+                </div>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <span style={{ color: 'var(--muted)', fontSize: 13 }}>Writes to Supabase-backed API</span>
+                  <button className="button primary" type="submit">
+                    Add application
+                  </button>
+                </div>
+              </form>
+              <div className="alert info" style={{ marginTop: 12 }}>
+                Tip: Categories and stores help new joiners find the right app without searching shared drives.
+              </div>
+            </div>
+          )}
+        </div>
+      );
+    };
+
+    const Catalog = ({ persona, apps, allApps, selectedAppId, onSelectApp, onDownload, onFeedback, feedback }) => {
+      const chartRef = useRef(null);
+      const ratingChartRef = useRef(null);
+
+      useEffect(() => {
+        if (!chartRef.current || !ratingChartRef.current) return;
+        const ctx = chartRef.current.getContext('2d');
+        const ratingCtx = ratingChartRef.current.getContext('2d');
+
+        const downloadChart = new Chart(ctx, {
+          type: 'bar',
+          data: {
+            labels: allApps.map((a) => a.name),
+            datasets: [
+              {
+                label: 'Downloads',
+                data: allApps.map((a) => a.downloads || 0),
+                backgroundColor: 'rgba(56, 189, 248, 0.6)',
+                borderColor: 'rgba(56, 189, 248, 1)',
+                borderWidth: 1,
+              },
+            ],
+          },
+          options: { plugins: { legend: { labels: { color: '#e5e7eb' } } }, scales: { x: { ticks: { color: '#9ca3af' } }, y: { ticks: { color: '#9ca3af' } } } },
+        });
+
+        const ratingChart = new Chart(ratingCtx, {
+          type: 'line',
+          data: {
+            labels: allApps.map((a) => a.name),
+            datasets: [
+              {
+                label: 'Average rating',
+                data: allApps.map((a) => a.rating || 0),
+                borderColor: 'rgba(167, 139, 250, 1)',
+                backgroundColor: 'rgba(167, 139, 250, 0.2)',
+                tension: 0.3,
+              },
+            ],
+          },
+          options: { plugins: { legend: { labels: { color: '#e5e7eb' } } }, scales: { x: { ticks: { color: '#9ca3af' } }, y: { ticks: { color: '#9ca3af' }, suggestedMin: 0, suggestedMax: 5 } } },
+        });
+
+        return () => {
+          downloadChart.destroy();
+          ratingChart.destroy();
+        };
+      }, [allApps]);
+
+      return (
+        <div className="grid" style={{ gap: 14 }}>
+          <div className="panel">
+            <h2>Catalog</h2>
+            <div className="grid" style={{ gap: 12 }}>
+              {apps.length === 0 && <div className="alert warn">No applications found. Try clearing filters.</div>}
+              {apps.map((app) => (
+                <div key={app.id} className="app-card">
+                  <div>
+                    <div className="card-meta">
+                      <span className="pill">{app.category}</span>
+                      <span>{app.store || 'Main'} store</span>
+                      <span>Updated {app.lastUpdated || '—'}</span>
+                    </div>
+                    <h3 style={{ margin: '4px 0' }}>{app.name}</h3>
+                    <p style={{ margin: '6px 0', color: '#d1d5db', lineHeight: 1.5 }}>{app.description}</p>
+                    <div className="tag-row">
+                      {(app.tags || []).map((field) => (
+                        <span key={field} className="usage-tag">{field}</span>
+                      ))}
+                    </div>
+                    <div style={{ color: '#a5b4fc', fontSize: 13, margin: '6px 0' }}>
+                      {app.updateInfo || 'Awaiting release notes'}
+                    </div>
+                    <div className="stats">
+                      <div className="stat">
+                        <strong>{app.downloads || 0}</strong>
+                        <span>Downloads</span>
+                      </div>
+                      <div className="stat">
+                        <strong>{app.rating ? app.rating.toFixed(1) : 'N/A'}</strong>
+                        <span>Avg rating</span>
+                      </div>
+                    </div>
+                    <div style={{ marginTop: 10 }}>
+                      <button className="button primary" onClick={() => onDownload(app.id)}>
+                        Download
+                      </button>
+                      <button className="button ghost" style={{ marginLeft: 8 }} onClick={() => onSelectApp(app.id)}>
+                        View feedback
+                      </button>
+                    </div>
+                  </div>
+                  <div style={{ display: 'grid', gap: 10, justifyItems: 'end' }}>
+                    <div className="badge">{app.store || 'Main'}</div>
+                    <div style={{ textAlign: 'right', color: 'var(--muted)' }}>
+                      <div style={{ fontSize: 12 }}>Release</div>
+                      <div style={{ fontWeight: 700 }}>{app.lastUpdated || 'TBD'}</div>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {selectedAppId && (
+            <div className="panel">
+              <Detail
+                app={allApps.find((a) => a.id === selectedAppId)}
+                persona={persona}
+                feedback={feedback}
+                onFeedback={onFeedback}
+              />
+            </div>
+          )}
+
+          <div className="panel">
+            <h2>Insights</h2>
+            <div className="chart-grid">
+              <canvas ref={chartRef} height="180"></canvas>
+              <canvas ref={ratingChartRef} height="180"></canvas>
+            </div>
+          </div>
+        </div>
+      );
+    };
+
+    const Detail = ({ app, persona, feedback, onFeedback }) => {
+      if (!app) return null;
+
+      return (
+        <div className="grid" style={{ gap: 12 }}>
+          <div>
+            <div className="card-meta" style={{ marginBottom: 4 }}>
+              <span className="pill">{app.category}</span>
+              <span>{app.store || 'Main'} store</span>
+              <span>Last updated {app.lastUpdated || '—'}</span>
+              <span>{app.downloads || 0} downloads</span>
+            </div>
+            <h2 style={{ margin: '6px 0 6px' }}>{app.name}</h2>
+            <p style={{ color: '#d1d5db', lineHeight: 1.5 }}>{app.description}</p>
+            <div className="tag-row">
+              {(app.tags || []).map((field) => (
+                <span key={field} className="usage-tag">{field}</span>
+              ))}
+            </div>
+            <div style={{ color: '#a5b4fc', fontSize: 13 }}>{app.updateInfo || 'Release notes pending'}</div>
+          </div>
+
+          <div className="divider" />
+
+          <div>
+            <h3>User feedback</h3>
+            <div className="grid" style={{ gap: 8 }}>
+              {(app.feedback || []).length === 0 && <div className="alert info">No feedback yet. Be the first to leave a note.</div>}
+              {(app.feedback || []).map((s, idx) => (
+                <div key={idx} className="alert" style={{ background: 'rgba(79, 70, 229, 0.08)', border: '1px solid rgba(79, 70, 229, 0.3)' }}>
+                  <strong style={{ textTransform: 'capitalize' }}>{s.persona}</strong> · {s.user || 'anonymous'} · {new Date(s.createdAt).toLocaleDateString()}<br />
+                  {s.comment}
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div className="divider" />
+
+          <div>
+            <h3>{persona === 'admin' ? 'Log update or response' : 'Leave a rating & suggestion'}</h3>
+            <form className="grid" style={{ gap: 10 }} onSubmit={(e) => onFeedback(e, app.id)}>
+              <div>
+                <label>Rating</label>
+                <select value={feedback.rating} onChange={(e) => feedback.setRating(Number(e.target.value))}>
+                  {[1, 2, 3, 4, 5].map((n) => (
+                    <option key={n} value={n}>
+                      {n} star{n > 1 ? 's' : ''}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <div>
+                <label>{persona === 'admin' ? 'Update or mitigation note' : 'Suggestion'}</label>
+                <textarea
+                  value={feedback.comment}
+                  onChange={(e) => feedback.setComment(e.target.value)}
+                  placeholder="Share deployment status, rollout notes, or UX suggestions"
+                />
+              </div>
+              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8 }}>
+                <button className="button ghost" type="button" onClick={feedback.reset}>Clear</button>
+                <button className="button primary" type="submit">
+                  Submit
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      );
+    };
+
+    ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+  </script>
+</body>
+</html>
