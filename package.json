@@ -1,0 +1,19 @@
+{
+  "name": "enterprise-app-manager",
+  "version": "1.0.0",
+  "description": "Lightweight backend API for the enterprise application manager demo UI",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "PORT=4000 node server.js"
+  },
+  "keywords": ["express", "app-manager", "demo"],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "cors": "^2.8.5",
+    "express": "^4.19.2",
+    "firebase-admin": "^12.1.1",
+    "helmet": "^7.1.0"
+  }
+}
