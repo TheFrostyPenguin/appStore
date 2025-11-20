@@ -11,7 +11,6 @@ const seedApps = [
     id: 'atlas-schematic-designer',
     name: 'Atlas Schematic Designer',
     category: 'Engineering',
-    store: 'Core Engineering',
     tags: ['PCB', 'Schematics', 'Simulation'],
     description: 'Secure circuit design and simulation toolkit with change history.',
     downloads: 240,
@@ -34,7 +33,6 @@ const seedApps = [
     id: 'ops-automation-workbench',
     name: 'Ops Automation Workbench',
     category: 'Automation',
-    store: 'Operations',
     tags: ['RPA', 'Scheduling', 'Compliance'],
     description: 'Orchestrate runbooks, deploy agents, and audit changes.',
     downloads: 180,
@@ -57,7 +55,6 @@ const seedApps = [
     id: 'safety-inspection-suite',
     name: 'Safety Inspection Suite',
     category: 'Safety',
-    store: 'Field',
     tags: ['Compliance', 'Field'],
     description: 'Offline-ready checklists, site evidence capture, and approval routing.',
     downloads: 120,
@@ -122,18 +119,14 @@ function toSafeApp(app = {}) {
     ...app,
     tags: Array.isArray(app.tags) ? app.tags.slice(0, 10) : [],
     category: validCategories.includes(app.category) ? app.category : 'General',
-    store: app.store || 'Main',
     feedback: Array.isArray(app.feedback) ? app.feedback : [],
   };
 }
 
-function matchFilters(app, { category, tag, q, store }) {
+function matchFilters(app, { category, tag, q }) {
   let ok = true;
   if (category) {
     ok = ok && app.category.toLowerCase() === category.toLowerCase();
-  }
-  if (store) {
-    ok = ok && (app.store || '').toLowerCase() === store.toLowerCase();
   }
   if (tag) {
     ok = ok && Array.isArray(app.tags) && app.tags.some((t) => t.toLowerCase() === tag.toLowerCase());
@@ -149,30 +142,15 @@ function matchFilters(app, { category, tag, q, store }) {
   return ok;
 }
 
-function sortApps(apps = [], sort) {
-  switch (sort) {
-    case 'downloads':
-      return [...apps].sort((a, b) => (b.downloads || 0) - (a.downloads || 0));
-    case 'rating':
-      return [...apps].sort((a, b) => (b.rating || 0) - (a.rating || 0));
-    case 'updated':
-      return [...apps].sort((a, b) => new Date(b.lastUpdated || 0) - new Date(a.lastUpdated || 0));
-    default:
-      return [...apps].sort((a, b) => a.name.localeCompare(b.name));
-  }
-}
-
 async function listApps(filters = {}) {
   if (!useFirebase) {
-    const filtered = memoryApps.filter((app) => matchFilters(app, filters));
-    return sortApps(filtered, filters.sort);
+    return memoryApps.filter((app) => matchFilters(app, filters));
   }
 
   ensureFirebase();
   const snapshot = await firestore.collection('apps').get();
   const results = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
-  const filtered = results.filter((app) => matchFilters(app, filters));
-  return sortApps(filtered, filters.sort);
+  return results.filter((app) => matchFilters(app, filters));
 }
 
 async function getApp(id) {
@@ -326,13 +304,6 @@ async function listCategories() {
   return Array.from(categories);
 }
 
-async function listStores() {
-  const stores = new Set();
-  const apps = await listApps();
-  apps.forEach((app) => stores.add(app.store || 'Main'));
-  return Array.from(stores);
-}
-
 async function getStats() {
   const apps = await listApps();
   const totals = apps.reduce(
@@ -362,7 +333,6 @@ module.exports = {
   addRating,
   addFeedback,
   listCategories,
-  listStores,
   getStats,
   validCategories,
   storageBucket,
