@@ -1,0 +1,492 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Enterprise Application Manager</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg: #0f172a;
+      --panel: #111827;
+      --muted: #9ca3af;
+      --primary: #38bdf8;
+      --success: #22c55e;
+      --warning: #eab308;
+      --surface: #1f2937;
+      --border: #2f3646;
+      --radius: 12px;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      font-family: 'Inter', system-ui, -apple-system, sans-serif;
+      background: radial-gradient(circle at 10% 20%, rgba(56, 189, 248, 0.12), transparent 25%),
+        radial-gradient(circle at 90% 10%, rgba(139, 92, 246, 0.12), transparent 20%),
+        var(--bg);
+      color: #e5e7eb;
+      min-height: 100vh;
+    }
+
+    header {
+      padding: 24px 32px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      position: sticky;
+      top: 0;
+      background: rgba(15, 23, 42, 0.75);
+      backdrop-filter: blur(8px);
+      border-bottom: 1px solid var(--border);
+      z-index: 10;
+    }
+
+    .title {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+      font-weight: 700;
+      font-size: 20px;
+    }
+
+    main {
+      padding: 16px 24px 48px;
+      display: grid;
+      gap: 16px;
+      grid-template-columns: 320px 1fr 360px;
+    }
+
+    .panel {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 16px;
+      box-shadow: 0 12px 32px rgba(0, 0, 0, 0.25);
+    }
+
+    input, select, textarea, button {
+      font-family: inherit;
+      font-size: 14px;
+    }
+
+    label { display: block; margin-bottom: 6px; font-weight: 600; color: #e2e8f0; }
+
+    input, select, textarea {
+      width: 100%;
+      padding: 10px 12px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      color: #e5e7eb;
+    }
+
+    textarea { resize: vertical; }
+
+    button {
+      cursor: pointer;
+      border: none;
+      border-radius: 10px;
+      padding: 10px 14px;
+      font-weight: 700;
+      color: #0b1224;
+      background: linear-gradient(120deg, #38bdf8, #60a5fa);
+      transition: transform 0.1s ease;
+    }
+
+    button.secondary { background: #1f2937; color: #e5e7eb; border: 1px solid var(--border); }
+    button:disabled { opacity: 0.6; cursor: not-allowed; }
+    button:hover { transform: translateY(-1px); }
+
+    .list {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      max-height: calc(100vh - 220px);
+      overflow-y: auto;
+      padding-right: 4px;
+    }
+
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 12px;
+      display: grid;
+      gap: 6px;
+      cursor: pointer;
+    }
+
+    .card.active { border-color: rgba(56, 189, 248, 0.6); box-shadow: 0 0 0 1px rgba(56, 189, 248, 0.4); }
+
+    .badge { background: rgba(34, 197, 94, 0.12); color: #bbf7d0; padding: 4px 8px; border-radius: 6px; font-weight: 600; font-size: 12px; }
+
+    .muted { color: var(--muted); font-size: 13px; }
+
+    .tag-row { display: flex; gap: 6px; flex-wrap: wrap; }
+    .tag { background: rgba(56, 189, 248, 0.12); color: #bae6fd; padding: 4px 8px; border-radius: 8px; font-size: 12px; border: 1px solid rgba(56, 189, 248, 0.18); }
+
+    .stat-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 10px; }
+    .stat { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 12px; }
+    .stat strong { display: block; font-size: 18px; }
+    .stat span { color: var(--muted); font-size: 13px; }
+
+    .alert { padding: 10px 12px; border-radius: 10px; font-size: 14px; border: 1px solid rgba(56, 189, 248, 0.25); background: rgba(56, 189, 248, 0.08); }
+    .alert.warn { background: rgba(234, 179, 8, 0.08); border-color: rgba(234, 179, 8, 0.4); color: #fef9c3; }
+    .alert.error { background: rgba(239, 68, 68, 0.08); border-color: rgba(239, 68, 68, 0.5); color: #fecdd3; }
+
+    .divider { border-top: 1px solid var(--border); margin: 16px 0; }
+
+    .chart-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 12px; }
+
+    @media (max-width: 1100px) {
+      main { grid-template-columns: 1fr; }
+      .list { max-height: none; }
+    }
+  </style>
+</head>
+<body>
+  <div id="root"></div>
+
+  <script src="https://unpkg.com/react@18/umd/react.development.js" crossorigin></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js" crossorigin></script>
+  <script src="https://unpkg.com/babel-standalone@6/babel.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+  <script type="text/babel">
+    const { useEffect, useMemo, useRef, useState } = React;
+    const API_BASE = window.API_BASE || '';
+
+    const personaOptions = [
+      { value: 'viewer', label: 'Viewer' },
+      { value: 'admin', label: 'Admin' },
+    ];
+
+    const defaultNewApp = { id: '', name: '', category: 'Engineering', description: '', tags: '', downloadUrl: '', updateInfo: '' };
+
+    const fetchJson = async (path, options = {}) => {
+      const res = await fetch(`${API_BASE}${path}`, {
+        headers: { 'Content-Type': 'application/json', ...(options.headers || {}) },
+        ...options,
+      });
+      const text = await res.text();
+      const data = text ? JSON.parse(text) : {};
+      if (!res.ok) throw new Error(data.error || res.statusText);
+      return data;
+    };
+
+    const Status = ({ status }) => {
+      if (!status) return null;
+      return <div className={`alert ${status.tone === 'error' ? 'error' : status.tone === 'warn' ? 'warn' : ''}`}>{status.message}</div>;
+    };
+
+    const Stats = ({ stats, apps }) => {
+      const barRef = useRef(null);
+      const pieRef = useRef(null);
+
+      useEffect(() => {
+        if (!stats || !barRef.current || !pieRef.current) return;
+        const barCtx = barRef.current.getContext('2d');
+        const pieCtx = pieRef.current.getContext('2d');
+
+        const downloads = apps.map((a) => a.downloads || 0);
+        const ratings = apps.map((a) => a.rating || 0);
+
+        const bar = new Chart(barCtx, {
+          type: 'bar',
+          data: {
+            labels: apps.map((a) => a.name),
+            datasets: [
+              { label: 'Downloads', backgroundColor: '#38bdf8', data: downloads },
+              { label: 'Rating', backgroundColor: '#a855f7', data: ratings },
+            ],
+          },
+          options: { responsive: true, plugins: { legend: { labels: { color: '#e5e7eb' } } }, scales: { x: { ticks: { color: '#e5e7eb' } }, y: { ticks: { color: '#e5e7eb' } } } },
+        });
+
+        const pie = new Chart(pieCtx, {
+          type: 'pie',
+          data: {
+            labels: Object.keys(stats.categoryBreakdown || {}),
+            datasets: [
+              {
+                data: Object.values(stats.categoryBreakdown || {}),
+                backgroundColor: ['#38bdf8', '#a855f7', '#22c55e', '#f59e0b', '#ec4899', '#6366f1'],
+              },
+            ],
+          },
+          options: { plugins: { legend: { labels: { color: '#e5e7eb' } } } },
+        });
+
+        return () => {
+          bar.destroy();
+          pie.destroy();
+        };
+      }, [stats, apps]);
+
+      return (
+        <div className="panel">
+          <h3 style={{ marginTop: 0 }}>Usage insights</h3>
+          <div className="stat-grid">
+            <div className="stat"><strong>{stats?.appCount || 0}</strong><span>Applications</span></div>
+            <div className="stat"><strong>{stats?.totalDownloads || 0}</strong><span>Downloads</span></div>
+            <div className="stat"><strong>{stats?.averageRating || 0}</strong><span>Avg rating</span></div>
+          </div>
+          <div className="chart-grid" style={{ marginTop: 12 }}>
+            <canvas ref={barRef} height="200"></canvas>
+            <canvas ref={pieRef} height="200"></canvas>
+          </div>
+        </div>
+      );
+    };
+
+    const AppCard = ({ app, active, onSelect }) => (
+      <div className={`card ${active ? 'active' : ''}`} onClick={() => onSelect(app.id)}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <div>
+            <div style={{ fontWeight: 700 }}>{app.name}</div>
+            <div className="muted">{app.category}</div>
+          </div>
+          <div className="badge">{app.downloads || 0} downloads</div>
+        </div>
+        <div className="muted">{app.description}</div>
+        <div className="tag-row">{(app.tags || []).map((tag) => <span key={tag} className="tag">{tag}</span>)}</div>
+      </div>
+    );
+
+    const Detail = ({ app, persona, onDownload, feedback, onFeedbackChange, onSubmitFeedback }) => {
+      if (!app) return <div className="panel">Select an application to see details.</div>;
+      return (
+        <div className="panel">
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <div>
+              <h2 style={{ margin: '4px 0 0' }}>{app.name}</h2>
+              <div className="muted">Updated {new Date(app.lastUpdated || Date.now()).toLocaleDateString()} · {app.updateInfo || 'Release notes pending'}</div>
+            </div>
+            <button onClick={() => onDownload(app.id)}>Download</button>
+          </div>
+          <p style={{ lineHeight: 1.6 }}>{app.description}</p>
+          <div className="tag-row">{(app.tags || []).map((tag) => <span key={tag} className="tag">{tag}</span>)}</div>
+          <div className="divider"></div>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 12 }}>
+            <div className="stat"><strong>{app.downloads || 0}</strong><span>Downloads</span></div>
+            <div className="stat"><strong>{app.rating || 0} / 5</strong><span>{app.ratingCount || 0} ratings</span></div>
+          </div>
+          <div className="divider"></div>
+          <form onSubmit={(e) => onSubmitFeedback(e, app.id)} style={{ display: 'grid', gap: 10 }}>
+            <label>Rate &amp; comment</label>
+            <div style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
+              <input type="number" min="1" max="5" step="1" value={feedback.rating} onChange={(e) => onFeedbackChange({ rating: Number(e.target.value) })} style={{ width: 90 }} />
+              <input type="text" placeholder="Your name" value={feedback.user} onChange={(e) => onFeedbackChange({ user: e.target.value })} />
+            </div>
+            <textarea rows="3" placeholder="Share a quick suggestion" value={feedback.comment} onChange={(e) => onFeedbackChange({ comment: e.target.value })}></textarea>
+            <button type="submit" disabled={persona !== 'admin' && persona !== 'viewer'}>Submit feedback</button>
+          </form>
+          <div className="divider"></div>
+          <h4 style={{ margin: '0 0 8px' }}>Latest feedback</h4>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+            {(app.feedback || []).slice().reverse().slice(0, 6).map((entry, idx) => (
+              <div key={idx} className="card" style={{ cursor: 'default' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                  <strong>{entry.user}</strong>
+                  <span className="muted">{new Date(entry.createdAt).toLocaleString()}</span>
+                </div>
+                <div className="muted">{entry.persona}</div>
+                {entry.rating ? <div className="badge">Rated {entry.rating}/5</div> : null}
+                <div>{entry.comment}</div>
+              </div>
+            ))}
+          </div>
+        </div>
+      );
+    };
+
+    const App = () => {
+      const [persona, setPersona] = useState('viewer');
+      const [filters, setFilters] = useState({ search: '', category: 'all' });
+      const [apps, setApps] = useState([]);
+      const [categories, setCategories] = useState(['all']);
+      const [stats, setStats] = useState(null);
+      const [selectedAppId, setSelectedAppId] = useState(null);
+      const [newApp, setNewApp] = useState(defaultNewApp);
+      const [status, setStatus] = useState(null);
+      const [loading, setLoading] = useState(true);
+      const [feedback, setFeedback] = useState({ rating: 5, comment: '', user: 'anonymous' });
+
+      const filteredApps = useMemo(() => {
+        const term = filters.search.toLowerCase();
+        return apps.filter((app) => {
+          const matchesCategory = filters.category === 'all' || app.category === filters.category;
+          const matchesSearch =
+            !term ||
+            app.name.toLowerCase().includes(term) ||
+            app.description.toLowerCase().includes(term) ||
+            (app.tags || []).some((t) => t.toLowerCase().includes(term));
+          return matchesCategory && matchesSearch;
+        });
+      }, [apps, filters]);
+
+      const selectedApp = filteredApps.find((a) => a.id === selectedAppId) || filteredApps[0];
+
+      const refresh = async (message) => {
+        setLoading(true);
+        try {
+          const [appsRes, categoriesRes, statsRes] = await Promise.all([
+            fetchJson(`/api/apps?${new URLSearchParams({
+              q: filters.search || '',
+              category: filters.category === 'all' ? '' : filters.category,
+            })}`),
+            fetchJson('/api/categories'),
+            fetchJson('/api/stats'),
+          ]);
+          setApps(appsRes.apps || []);
+          setCategories(['all', ...(categoriesRes.categories || [])]);
+          setStats(statsRes);
+          if (!selectedAppId && (appsRes.apps || []).length) setSelectedAppId(appsRes.apps[0].id);
+          if (message) setStatus({ tone: 'info', message });
+        } catch (error) {
+          setStatus({ tone: 'error', message: error.message });
+        } finally {
+          setLoading(false);
+        }
+      };
+
+      useEffect(() => { refresh(); }, []);
+
+      useEffect(() => {
+        if (!loading) refresh();
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+      }, [filters.category]);
+
+      const handleAddApp = async (e) => {
+        e.preventDefault();
+        try {
+          await fetchJson('/api/apps', {
+            method: 'POST',
+            headers: { 'x-user-role': persona },
+            body: JSON.stringify({
+              id: newApp.id.trim() || newApp.name.trim().toLowerCase().replace(/\s+/g, '-'),
+              name: newApp.name.trim(),
+              category: newApp.category,
+              description: newApp.description.trim(),
+              tags: newApp.tags.split(',').map((t) => t.trim()).filter(Boolean),
+              downloadUrl: newApp.downloadUrl.trim(),
+              updateInfo: newApp.updateInfo.trim(),
+            }),
+          });
+          setNewApp(defaultNewApp);
+          await refresh('Application created');
+        } catch (error) {
+          setStatus({ tone: 'error', message: error.message });
+        }
+      };
+
+      const handleFeedback = async (e, appId) => {
+        e.preventDefault();
+        if (!appId) return;
+        try {
+          await fetchJson(`/api/apps/${appId}/rate`, {
+            method: 'POST',
+            body: JSON.stringify({
+              rating: feedback.rating,
+              comment: feedback.comment,
+              user: feedback.user,
+              persona,
+            }),
+          });
+          setFeedback({ rating: 5, comment: '', user: 'anonymous' });
+          await refresh('Thanks for the feedback!');
+          setSelectedAppId(appId);
+        } catch (error) {
+          setStatus({ tone: 'error', message: error.message });
+        }
+      };
+
+      const handleDownload = async (appId) => {
+        try {
+          const res = await fetchJson(`/api/apps/${appId}/download`, { method: 'POST' });
+          await refresh();
+          if (res.downloadUrl) window.open(res.downloadUrl, '_blank');
+        } catch (error) {
+          setStatus({ tone: 'error', message: error.message });
+        }
+      };
+
+      return (
+        <>
+          <header>
+            <div className="title">
+              <span style={{ width: 10, height: 10, background: '#38bdf8', borderRadius: '50%' }}></span>
+              Enterprise Application Manager
+            </div>
+            <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+              <select value={persona} onChange={(e) => setPersona(e.target.value)}>
+                {personaOptions.map((p) => <option key={p.value} value={p.value}>{p.label}</option>)}
+              </select>
+            </div>
+          </header>
+
+          <main>
+            <div className="panel">
+              <h3 style={{ marginTop: 4 }}>Browse catalog</h3>
+              <div style={{ display: 'grid', gap: 8 }}>
+                <input placeholder="Search by name, description, or tag" value={filters.search} onChange={(e) => setFilters({ ...filters, search: e.target.value })} />
+                <select value={filters.category} onChange={(e) => setFilters({ ...filters, category: e.target.value })}>
+                  {categories.map((c) => <option key={c} value={c}>{c}</option>)}
+                </select>
+              </div>
+              <div className="divider"></div>
+              {loading ? <div className="muted">Loading applications…</div> : null}
+              <div className="list">
+                {filteredApps.map((app) => (
+                  <AppCard key={app.id} app={app} active={selectedAppId === app.id} onSelect={setSelectedAppId} />
+                ))}
+                {!filteredApps.length && !loading ? <div className="muted">No apps match your filters.</div> : null}
+              </div>
+            </div>
+
+            <Detail
+              app={selectedApp}
+              persona={persona}
+              onDownload={handleDownload}
+              feedback={feedback}
+              onFeedbackChange={(p) => setFeedback((prev) => ({ ...prev, ...p }))}
+              onSubmitFeedback={handleFeedback}
+            />
+
+            <div className="panel">
+              <h3 style={{ marginTop: 4 }}>Admin: add an application</h3>
+              <form onSubmit={handleAddApp} style={{ display: 'grid', gap: 10 }}>
+                <label>Display name</label>
+                <input value={newApp.name} onChange={(e) => setNewApp({ ...newApp, name: e.target.value })} placeholder="Telemetry Uploader" required />
+                <label>Unique id (optional)</label>
+                <input value={newApp.id} onChange={(e) => setNewApp({ ...newApp, id: e.target.value })} placeholder="telemetry-uploader" />
+                <label>Category</label>
+                <input value={newApp.category} onChange={(e) => setNewApp({ ...newApp, category: e.target.value })} placeholder="Engineering" />
+                <label>Description</label>
+                <textarea rows="3" value={newApp.description} onChange={(e) => setNewApp({ ...newApp, description: e.target.value })} required></textarea>
+                <label>Tags (comma separated)</label>
+                <input value={newApp.tags} onChange={(e) => setNewApp({ ...newApp, tags: e.target.value })} placeholder="RPA, Compliance" />
+                <label>Download URL</label>
+                <input value={newApp.downloadUrl} onChange={(e) => setNewApp({ ...newApp, downloadUrl: e.target.value })} placeholder="https://…" required />
+                <label>Update info</label>
+                <input value={newApp.updateInfo} onChange={(e) => setNewApp({ ...newApp, updateInfo: e.target.value })} placeholder="v2.0 – Adds offline sync" />
+                <button type="submit">Create app</button>
+                <div className="alert warn">Requires admin persona. Set the toggle in the header before submitting.</div>
+              </form>
+              <div className="divider"></div>
+              <Stats stats={stats} apps={apps} />
+            </div>
+          </main>
+          <div style={{ padding: '0 24px 32px' }}><Status status={status} /></div>
+        </>
+      );
+    };
+
+    ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+  </script>
+</body>
+</html>
