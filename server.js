@@ -5,10 +5,16 @@ const helmet = require('helmet');
 const store = require('./src/dataStore');
 
 const PORT = process.env.PORT || 3001;
+const requiredEnv = ['SUPABASE_URL', 'SUPABASE_ANON_KEY', 'SUPABASE_SERVICE_ROLE_KEY'];
+const missing = requiredEnv.filter((key) => !process.env[key]);
+if (missing.length) {
+  throw new Error(`Missing required Supabase environment variables: ${missing.join(', ')}`);
+}
+
 const app = express();
 const publicConfig = {
-  supabaseUrl: process.env.SUPABASE_URL || '',
-  supabaseAnonKey: process.env.SUPABASE_ANON_KEY || '',
+  supabaseUrl: process.env.SUPABASE_URL,
+  supabaseAnonKey: process.env.SUPABASE_ANON_KEY,
 };
 
 const USERS = [

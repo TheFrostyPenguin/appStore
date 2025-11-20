@@ -5,7 +5,7 @@ Follow these steps to run the app locally and verify the frontend + backend with
 ## Prerequisites
 - Node.js 18+ and npm installed.
 - Network access to `https://registry.npmjs.org` for `npm install`.
-- (Optional) Supabase project if you want to test against Postgres/Storage instead of the in-memory datastore.
+- Supabase project with URL, anon key, and service role key.
 
 ## 1) Install dependencies
 ```bash
@@ -20,17 +20,9 @@ PORT=4000 npm start  # choose a different port if needed
 ```
 The Express server also serves `index.html`, so you can visit `http://localhost:3001/` to use the UI.
 
-## 3) Try the built-in demo accounts
-- **Admin:** username `admin`, password `admin123` — can add apps.
-- **User:** username `user`, password `user123` — can browse, filter, sort, and download.
-
-## 4) Test with in-memory data (default)
-No extra setup is needed. The catalog seeds sample stores and apps so you can immediately log in and interact with the UI.
-
-## 5) Test with Supabase (optional)
-Set environment variables before `npm start` to switch to Supabase:
+## 3) Configure Supabase
+Set environment variables before `npm start` so the API and login can reach Supabase:
 ```bash
-USE_SUPABASE=true
 SUPABASE_URL=<your-supabase-url>
 SUPABASE_SERVICE_ROLE_KEY=<service-role-key>
 SUPABASE_ANON_KEY=<public-anon-key>   # enables the Supabase login screen in the frontend
@@ -40,12 +32,12 @@ Then create the Supabase resources:
 - Add RLS policies that allow authenticated reads and admin-only writes (sample policies are also in `BACKEND.md`).
 - If you need binary uploads, create a Storage bucket (e.g., `app-binaries`) and use signed URLs for downloads.
 
-Once the table and policies exist, restart with `USE_SUPABASE=true` and the backend will read/write Supabase instead of the in-memory store.
+The backend will refuse to start without these variables.
 
-## 6) Do I need a PR?
+## 5) Do I need a PR?
 No pull request is required to test locally. You can work directly in your clone; create a PR only when you want to share or merge your changes upstream.
 
-## 7) Quick frontend-only check
+## 6) Quick frontend-only check
 If you only want to view the UI without the Node server, open `index.html` directly in your browser or serve it with:
 ```bash
 python3 -m http.server 8000

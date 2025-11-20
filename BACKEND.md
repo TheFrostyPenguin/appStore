@@ -1,6 +1,6 @@
 # Backend API
 
-The backend is a small Express service that powers the catalog UI in `index.html`. It stores data in memory by default, but it can switch to Supabase (Postgres + Storage) by flipping an environment flag.
+The backend is a small Express service that powers the catalog UI in `index.html`. All data and auth go through Supabase (Postgres + Storage).
 
 ## Run locally
 
@@ -29,16 +29,15 @@ Frontend Supabase login pulls credentials from `/config.js`, which is generated 
 - `GET /api/stats` – totals for downloads, rating average, category breakdown, and app count
 
 ## Supabase wiring (Postgres + Storage)
-Supabase support is built into `src/dataStore.js`. When `USE_SUPABASE=true` the service uses Supabase Postgres for data and you can layer Supabase Storage (or S3) on top for binaries.
+Supabase powers every request through `src/dataStore.js`; Supabase credentials are mandatory.
 
 ### Minimal environment
 Create a `.env` file or export variables before running `npm start`:
 
 ```
-USE_SUPABASE=true
 SUPABASE_URL=<your-supabase-url>
 SUPABASE_SERVICE_ROLE_KEY=<service-role-key>
-SUPABASE_ANON_KEY=<public-anon-key>   # optional, surfaced to the frontend login at /config.js
+SUPABASE_ANON_KEY=<public-anon-key>   # surfaced to the frontend login at /config.js
 ```
 
 ### How to connect to Supabase (step-by-step)
@@ -77,10 +76,10 @@ create policy "apps update" on apps for update using (auth.role() = 'admin');
 
 5) **Optional storage**: create a Storage bucket (e.g., `app-binaries`) and generate signed URLs for downloads. Keep bucket policies restricted to prevent public writes.
 
-6) **Configure environment**: place the credentials in `.env` as shown above, then start the server with `npm start`. The API will automatically use Supabase when `USE_SUPABASE=true`.
+6) **Configure environment**: place the credentials in `.env` as shown above, then start the server with `npm start`. The API will refuse to start without Supabase credentials.
 
 ### Supabase structure
-Create an `apps` table with columns matching the in-memory shape:
+Create an `apps` table with columns matching the shape used by the UI:
 
 ```
 id (text, primary key)
