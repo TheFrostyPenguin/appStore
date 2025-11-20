@@ -1,16 +1,14 @@
-const { existsSync } = require('fs');
-const path = require('path');
+const { createClient } = require('@supabase/supabase-js');
 
-const useFirebase = process.env.USE_FIREBASE === 'true';
-let admin;
-let firestore;
-let storageBucket;
+const useSupabase = process.env.USE_SUPABASE === 'true';
+let supabase;
 
 const seedApps = [
   {
     id: 'atlas-schematic-designer',
     name: 'Atlas Schematic Designer',
     category: 'Engineering',
+    store: 'Core Engineering',
     tags: ['PCB', 'Schematics', 'Simulation'],
     description: 'Secure circuit design and simulation toolkit with change history.',
     downloads: 240,
@@ -33,6 +31,7 @@ const seedApps = [
     id: 'ops-automation-workbench',
     name: 'Ops Automation Workbench',
     category: 'Automation',
+    store: 'Operations',
     tags: ['RPA', 'Scheduling', 'Compliance'],
     description: 'Orchestrate runbooks, deploy agents, and audit changes.',
     downloads: 180,
@@ -55,6 +54,7 @@ const seedApps = [
     id: 'safety-inspection-suite',
     name: 'Safety Inspection Suite',
     category: 'Safety',
+    store: 'Field',
     tags: ['Compliance', 'Field'],
     description: 'Offline-ready checklists, site evidence capture, and approval routing.',
     downloads: 120,
@@ -79,39 +79,14 @@ const validCategories = ['Engineering', 'Automation', 'Safety', 'Operations', 'D
 
 let memoryApps = [...seedApps];
 
-function buildCredentialFromEnv(adminLib) {
-  if (process.env.FIREBASE_SERVICE_ACCOUNT_PATH) {
-    const credentialPath = path.resolve(process.env.FIREBASE_SERVICE_ACCOUNT_PATH);
-    if (!existsSync(credentialPath)) {
-      throw new Error(`FIREBASE_SERVICE_ACCOUNT_PATH not found at ${credentialPath}`);
-    }
-    // eslint-disable-next-line global-require, import/no-dynamic-require
-    return adminLib.credential.cert(require(credentialPath));
+function ensureSupabase() {
+  if (!useSupabase) return;
+  if (!process.env.SUPABASE_URL || !process.env.SUPABASE_SERVICE_ROLE_KEY) {
+    throw new Error('SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY must be set when USE_SUPABASE=true');
   }
-
-  if (process.env.FIREBASE_CLIENT_EMAIL && process.env.FIREBASE_PRIVATE_KEY && process.env.FIREBASE_PROJECT_ID) {
-    return adminLib.credential.cert({
-      projectId: process.env.FIREBASE_PROJECT_ID,
-      clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
-      privateKey: process.env.FIREBASE_PRIVATE_KEY.replace(/\\n/g, '\n'),
-    });
+  if (!supabase) {
+    supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SERVICE_ROLE_KEY);
   }
-
-  return adminLib.credential.applicationDefault();
-}
-
-function ensureFirebase() {
-  if (!useFirebase) return;
-  admin = require('firebase-admin');
-  if (admin.apps.length === 0) {
-    admin.initializeApp({
-      credential: buildCredentialFromEnv(admin),
-      projectId: process.env.FIREBASE_PROJECT_ID,
-      storageBucket: process.env.FIREBASE_STORAGE_BUCKET,
-    });
-  }
-  firestore = admin.firestore();
-  storageBucket = admin.storage().bucket();
 }
 
 function toSafeApp(app = {}) {
@@ -119,14 +94,18 @@ function toSafeApp(app = {}) {
     ...app,
     tags: Array.isArray(app.tags) ? app.tags.slice(0, 10) : [],
     category: validCategories.includes(app.category) ? app.category : 'General',
+    store: app.store || 'Main',
     feedback: Array.isArray(app.feedback) ? app.feedback : [],
   };
 }
 
-function matchFilters(app, { category, tag, q }) {
+function matchFilters(app, { category, tag, q, store }) {
   let ok = true;
   if (category) {
     ok = ok && app.category.toLowerCase() === category.toLowerCase();
+  }
+  if (store) {
+    ok = ok && (app.store || '').toLowerCase() === store.toLowerCase();
   }
   if (tag) {
     ok = ok && Array.isArray(app.tags) && app.tags.some((t) => t.toLowerCase() === tag.toLowerCase());
@@ -142,24 +121,49 @@ function matchFilters(app, { category, tag, q }) {
   return ok;
 }
 
+function sortApps(apps = [], sort) {
+  switch (sort) {
+    case 'downloads':
+      return [...apps].sort((a, b) => (b.downloads || 0) - (a.downloads || 0));
+    case 'rating':
+      return [...apps].sort((a, b) => (b.rating || 0) - (a.rating || 0));
+    case 'updated':
+      return [...apps].sort((a, b) => new Date(b.lastUpdated || 0) - new Date(a.lastUpdated || 0));
+    default:
+      return [...apps].sort((a, b) => a.name.localeCompare(b.name));
+  }
+}
+
 async function listApps(filters = {}) {
-  if (!useFirebase) {
-    return memoryApps.filter((app) => matchFilters(app, filters));
+  if (!useSupabase) {
+    const filtered = memoryApps.filter((app) => matchFilters(app, filters));
+    return sortApps(filtered, filters.sort);
   }
 
-  ensureFirebase();
-  const snapshot = await firestore.collection('apps').get();
-  const results = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
-  return results.filter((app) => matchFilters(app, filters));
+  ensureSupabase();
+  const { data, error } = await supabase.from('apps').select('*');
+  if (error) {
+    // eslint-disable-next-line no-console
+    console.error('Supabase listApps error', error.message);
+    return [];
+  }
+  const filtered = data.filter((app) => matchFilters(app, filters));
+  return sortApps(filtered, filters.sort);
 }
 
 async function getApp(id) {
-  if (!useFirebase) {
+  if (!useSupabase) {
     return memoryApps.find((app) => app.id === id);
   }
-  ensureFirebase();
-  const doc = await firestore.collection('apps').doc(id).get();
-  return doc.exists ? { id, ...doc.data() } : null;
+  ensureSupabase();
+  const { data, error } = await supabase.from('apps').select('*').eq('id', id).single();
+  if (error) {
+    if (error.code === 'PGRST116') return null;
+    // eslint-disable-next-line no-console
+    console.error('Supabase getApp error', error.message);
+    return null;
+  }
+  return data || null;
 }
 
 async function createApp(appData) {
@@ -172,7 +176,7 @@ async function createApp(appData) {
     lastUpdated: new Date().toISOString(),
   });
 
-  if (!useFirebase) {
+  if (!useSupabase) {
     if (await getApp(safeApp.id)) {
       return { ok: false, status: 409, error: 'App id already exists' };
     }
@@ -180,18 +184,20 @@ async function createApp(appData) {
     return { ok: true, app: safeApp };
   }
 
-  ensureFirebase();
-  const docRef = firestore.collection('apps').doc(safeApp.id);
-  const existing = await docRef.get();
-  if (existing.exists) {
+  ensureSupabase();
+  const { data: existing } = await supabase.from('apps').select('id').eq('id', safeApp.id).maybeSingle();
+  if (existing) {
     return { ok: false, status: 409, error: 'App id already exists' };
   }
-  await docRef.set(safeApp);
+  const { error } = await supabase.from('apps').insert([safeApp]);
+  if (error) {
+    return { ok: false, status: 500, error: error.message };
+  }
   return { ok: true, app: { id: safeApp.id, ...safeApp } };
 }
 
 async function incrementDownload(id) {
-  if (!useFirebase) {
+  if (!useSupabase) {
     const app = await getApp(id);
     if (!app) return { ok: false, status: 404, error: 'App not found' };
     app.downloads += 1;
@@ -199,22 +205,15 @@ async function incrementDownload(id) {
     return { ok: true, data: { downloadUrl: app.downloadUrl, downloads: app.downloads } };
   }
 
-  ensureFirebase();
-  const ref = firestore.collection('apps').doc(id);
-  try {
-    const data = await firestore.runTransaction(async (tx) => {
-      const doc = await tx.get(ref);
-      if (!doc.exists) return null;
-      const app = doc.data();
-      const downloads = (app.downloads || 0) + 1;
-      tx.update(ref, { downloads });
-      return { downloadUrl: app.downloadUrl, downloads };
-    });
-    if (!data) return { ok: false, status: 404, error: 'App not found' };
-    return { ok: true, data };
-  } catch (error) {
+  ensureSupabase();
+  const app = await getApp(id);
+  if (!app) return { ok: false, status: 404, error: 'App not found' };
+  const downloads = (app.downloads || 0) + 1;
+  const { error } = await supabase.from('apps').update({ downloads }).eq('id', id);
+  if (error) {
     return { ok: false, status: 500, error: error.message };
   }
+  return { ok: true, data: { downloadUrl: app.downloadUrl, downloads } };
 }
 
 async function addRating(id, payload) {
@@ -226,7 +225,7 @@ async function addRating(id, payload) {
     createdAt: new Date().toISOString(),
   };
 
-  if (!useFirebase) {
+  if (!useSupabase) {
     const app = await getApp(id);
     if (!app) return { ok: false, status: 404, error: 'App not found' };
     const newRatingCount = (app.ratingCount || 0) + 1;
@@ -242,25 +241,21 @@ async function addRating(id, payload) {
     return { ok: true, data: { rating, ratingCount: newRatingCount, feedback: updated.feedback } };
   }
 
-  ensureFirebase();
-  const ref = firestore.collection('apps').doc(id);
-  try {
-    const result = await firestore.runTransaction(async (tx) => {
-      const doc = await tx.get(ref);
-      if (!doc.exists) return null;
-      const app = doc.data();
-      const newRatingCount = (app.ratingCount || 0) + 1;
-      const ratingSum = (app.rating || 0) * (app.ratingCount || 0) + payload.rating;
-      const rating = Number((ratingSum / newRatingCount).toFixed(2));
-      const feedback = [...(app.feedback || []), entry];
-      tx.update(ref, { rating, ratingCount: newRatingCount, feedback });
-      return { rating, ratingCount: newRatingCount, feedback };
-    });
-    if (!result) return { ok: false, status: 404, error: 'App not found' };
-    return { ok: true, data: result };
-  } catch (error) {
+  ensureSupabase();
+  const app = await getApp(id);
+  if (!app) return { ok: false, status: 404, error: 'App not found' };
+  const newRatingCount = (app.ratingCount || 0) + 1;
+  const ratingSum = (app.rating || 0) * (app.ratingCount || 0) + payload.rating;
+  const rating = Number((ratingSum / newRatingCount).toFixed(2));
+  const feedback = [...(app.feedback || []), entry];
+  const { error } = await supabase
+    .from('apps')
+    .update({ rating, ratingCount: newRatingCount, feedback })
+    .eq('id', id);
+  if (error) {
     return { ok: false, status: 500, error: error.message };
   }
+  return { ok: true, data: { rating, ratingCount: newRatingCount, feedback } };
 }
 
 async function addFeedback(id, payload) {
@@ -271,7 +266,7 @@ async function addFeedback(id, payload) {
     createdAt: new Date().toISOString(),
   };
 
-  if (!useFirebase) {
+  if (!useSupabase) {
     const app = await getApp(id);
     if (!app) return { ok: false, status: 404, error: 'App not found' };
     const updated = { ...app, feedback: [...(app.feedback || []), entry] };
@@ -279,22 +274,15 @@ async function addFeedback(id, payload) {
     return { ok: true, data: entry };
   }
 
-  ensureFirebase();
-  const ref = firestore.collection('apps').doc(id);
-  try {
-    const result = await firestore.runTransaction(async (tx) => {
-      const doc = await tx.get(ref);
-      if (!doc.exists) return null;
-      const app = doc.data();
-      const feedback = [...(app.feedback || []), entry];
-      tx.update(ref, { feedback });
-      return entry;
-    });
-    if (!result) return { ok: false, status: 404, error: 'App not found' };
-    return { ok: true, data: result };
-  } catch (error) {
+  ensureSupabase();
+  const app = await getApp(id);
+  if (!app) return { ok: false, status: 404, error: 'App not found' };
+  const feedback = [...(app.feedback || []), entry];
+  const { error } = await supabase.from('apps').update({ feedback }).eq('id', id);
+  if (error) {
     return { ok: false, status: 500, error: error.message };
   }
+  return { ok: true, data: entry };
 }
 
 async function listCategories() {
@@ -302,6 +290,13 @@ async function listCategories() {
   const apps = await listApps();
   apps.forEach((app) => categories.add(app.category));
   return Array.from(categories);
+}
+
+async function listStores() {
+  const stores = new Set();
+  const apps = await listApps();
+  apps.forEach((app) => stores.add(app.store || 'Main'));
+  return Array.from(stores);
 }
 
 async function getStats() {
@@ -333,8 +328,8 @@ module.exports = {
   addRating,
   addFeedback,
   listCategories,
+  listStores,
   getStats,
   validCategories,
-  storageBucket,
-  useFirebase,
+  useSupabase,
 };

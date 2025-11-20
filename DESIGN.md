@@ -7,10 +7,10 @@ The Enterprise Application Manager (EAM) is a web-based platform that streamline
 * **Frontend:** React.js single-page application using component-based UI patterns and Tailwind CSS for rapid theming. Communicates with the API via HTTPS and JWT bearer tokens. Client-side routing guards separate admin and viewer flows.
 * **Backend:** Node.js with Express.js exposing RESTful endpoints for authentication, application catalogs, file downloads, feedback, and analytics. Lightweight middleware chain handles validation, rate limiting, logging, and JWT verification.
 * **Data & Files:**
-  * **Metadata & user data:** Firebase (Firestore) stores applications, categories, ratings, comments, and user profiles. Aggregations support usage statistics.
-  * **File storage:** AWS S3 (or Firebase-compatible blob storage) holds application binaries and update packages; signed URLs are generated for controlled downloads.
+  * **Metadata & user data:** Supabase Postgres stores applications, categories, ratings, comments, and user profiles; SQL views support usage statistics.
+  * **File storage:** Supabase Storage buckets (or S3) hold application binaries and update packages; signed URLs are generated for controlled downloads.
 * **Security:** JWT-based authentication with role claims (admin, viewer), HTTPS-only transport, input validation, audit logging, and least-privilege access to storage buckets and databases.
-* **Deployment:** Stateless services hosted in containers; CI/CD builds frontend assets and deploys backend plus infrastructure-as-code templates for storage buckets, Firebase collections, and S3 policies.
+* **Deployment:** Stateless services hosted in containers; CI/CD builds frontend assets and deploys backend plus infrastructure-as-code templates for Supabase schema, storage buckets, and S3 policies.
 
 ## Component Design
 ### Frontend (React)
@@ -36,8 +36,8 @@ The Enterprise Application Manager (EAM) is a web-based platform that streamline
   * **Auth service:** Issues short-lived JWTs with role claims; optional refresh tokens stored HTTP-only; supports role-based policies.
   * **Catalog service:** Manages application metadata, categories, and version updates; ensures unique identifiers and normalized category taxonomy.
   * **Feedback service:** Handles ratings/comments, prevents duplicate ratings per user per version, and flags inappropriate content.
-  * **Storage service:** Generates time-bound S3 signed URLs, validates file types/size, and records integrity hashes for uploaded binaries.
-  * **Analytics service:** Retrieves aggregated stats from Firebase/BigQuery exports; feeds Chart.js datasets.
+  * **Storage service:** Generates time-bound Supabase Storage (or S3) signed URLs, validates file types/size, and records integrity hashes for uploaded binaries.
+  * **Analytics service:** Retrieves aggregated stats from Supabase SQL views/functions; feeds Chart.js datasets.
 
 ## Data Model Highlights
 * **Users:** `{ uid, name, email, role, createdAt, lastLogin }` with roles `admin` or `viewer`.
@@ -52,8 +52,8 @@ The Enterprise Application Manager (EAM) is a web-based platform that streamline
   * Optional MFA for admin logins; refresh tokens stored in HTTP-only, same-site cookies.
 * **Transport & storage security:**
   * Enforce HTTPS and HSTS; disable insecure TLS versions.
-  * S3 buckets configured with private ACLs and IAM policies scoped to necessary actions; signed URLs expire quickly.
-  * Firestore rules restrict access by role; all sensitive fields validated server-side.
+  * Supabase Storage (or S3) buckets configured with restrictive policies; signed URLs expire quickly.
+  * Supabase row-level security policies restrict access by role; all sensitive fields validated server-side.
 * **Data integrity & auditing:**
   * Checksums for uploaded binaries; store hash alongside metadata and verify on download.
   * Audit logs for admin actions (uploads, metadata edits, category changes, and deletions).
@@ -63,7 +63,7 @@ The Enterprise Application Manager (EAM) is a web-based platform that streamline
 ## Operational Concerns
 * **CI/CD:** Lints, tests, and builds frontend; runs backend unit/integration tests; deploys artifacts to staging then production. Environment configs managed via secrets vault.
 * **Monitoring:** Metrics on request latency, error rates, storage usage, download anomalies; alerting for high error/latency or unexpected download spikes.
-* **Backup & recovery:** Scheduled backups for Firestore exports and storage buckets; disaster recovery playbook with restore procedures.
+* **Backup & recovery:** Scheduled backups for Supabase database exports and storage buckets; disaster recovery playbook with restore procedures.
 * **Scalability:** Stateless API containers behind load balancer; CDN for static assets and downloads; database indexes on `categoryId`, `updatedAt`, and `appId` for fast queries.
 
 ## Success Criteria Alignment

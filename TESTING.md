@@ -5,7 +5,7 @@ Follow these steps to run the app locally and verify the frontend + backend with
 ## Prerequisites
 - Node.js 18+ and npm installed.
 - Network access to `https://registry.npmjs.org` for `npm install`.
-- (Optional) Firebase project if you want to test against Firestore/Storage instead of the in-memory datastore.
+- (Optional) Supabase project if you want to test against Postgres/Storage instead of the in-memory datastore.
 
 ## 1) Install dependencies
 ```bash
@@ -27,18 +27,20 @@ The Express server also serves `index.html`, so you can visit `http://localhost:
 ## 4) Test with in-memory data (default)
 No extra setup is needed. The catalog seeds sample stores and apps so you can immediately log in and interact with the UI.
 
-## 5) Test with Firebase (optional)
-Set environment variables before `npm start` to switch to Firestore:
+## 5) Test with Supabase (optional)
+Set environment variables before `npm start` to switch to Supabase:
 ```bash
-USE_FIREBASE=true
-FIREBASE_PROJECT_ID=<project-id>
-FIREBASE_CLIENT_EMAIL=<service-account-client-email>
-FIREBASE_PRIVATE_KEY="<private-key>"   # escape newlines
-FIREBASE_STORAGE_BUCKET=<bucket>.appspot.com  # optional for uploads
+USE_SUPABASE=true
+SUPABASE_URL=<your-supabase-url>
+SUPABASE_SERVICE_ROLE_KEY=<service-role-key>
+SUPABASE_ANON_KEY=<public-anon-key>   # enables the Supabase login screen in the frontend
 ```
-Alternatively set `FIREBASE_SERVICE_ACCOUNT_PATH=/absolute/path/to/key.json` if you prefer a JSON key.
+Then create the Supabase resources:
+- Use the SQL snippet in `BACKEND.md` to create the `apps` table and enable Row Level Security.
+- Add RLS policies that allow authenticated reads and admin-only writes (sample policies are also in `BACKEND.md`).
+- If you need binary uploads, create a Storage bucket (e.g., `app-binaries`) and use signed URLs for downloads.
 
-To avoid touching production data, run the Firebase Emulator Suite and export `FIRESTORE_EMULATOR_HOST=localhost:8080` before starting the server.
+Once the table and policies exist, restart with `USE_SUPABASE=true` and the backend will read/write Supabase instead of the in-memory store.
 
 ## 6) Do I need a PR?
 No pull request is required to test locally. You can work directly in your clone; create a PR only when you want to share or merge your changes upstream.
