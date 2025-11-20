@@ -15,15 +15,13 @@ The server also serves the frontend directly, so you can visit `http://localhost
 
 ## Endpoints
 - `GET /health` – readiness probe
-- `POST /api/login` – exchange `username`/`password` for `{ token, role, displayName }`
-- `GET /api/apps?category=&tag=&q=&store=&sort=` – list applications with filtering by category, tag, search term, store, and sort (name, downloads, rating, updated)
+- `GET /api/apps?category=&tag=&q=` – list applications with filtering
 - `GET /api/apps/:id` – fetch a single application
 - `POST /api/apps` – create a new application (requires header `x-user-role: admin`)
 - `POST /api/apps/:id/download` – increment downloads and return the `downloadUrl`
 - `POST /api/apps/:id/rate` – add a rating/comment and recalculate aggregate rating
 - `POST /api/apps/:id/feedback` – append a feedback entry without changing the rating
 - `GET /api/categories` – returns unique categories
-- `GET /api/stores` – returns unique store names
 - `GET /api/stats` – totals for downloads, rating average, category breakdown, and app count
 
 ## Firebase wiring (Firestore + Storage)
@@ -46,7 +44,7 @@ If you prefer a JSON key file, set `FIREBASE_SERVICE_ACCOUNT_PATH=/absolute/path
 Documents are stored in the `apps` collection with this shape:
 
 ```
-{ id, name, category, store, tags: [], description, downloads, rating, ratingCount, feedback: [], updateInfo, lastUpdated, downloadUrl }
+{ id, name, category, tags: [], description, downloads, rating, ratingCount, feedback: [], updateInfo, lastUpdated, downloadUrl }
 ```
 
 The API uses Firestore transactions for downloads and ratings to keep aggregates consistent.

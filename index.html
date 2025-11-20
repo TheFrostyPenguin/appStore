@@ -39,41 +39,63 @@
       align-items: center;
       position: sticky;
       top: 0;
+      backdrop-filter: blur(16px);
       background: rgba(15, 23, 42, 0.75);
-      backdrop-filter: blur(8px);
       border-bottom: 1px solid var(--border);
       z-index: 10;
     }
 
-    .title {
+    .logo {
       display: flex;
-      gap: 12px;
       align-items: center;
+      gap: 12px;
       font-weight: 700;
-      font-size: 20px;
+      letter-spacing: -0.02em;
+    }
+
+    .logo-badge {
+      width: 40px;
+      height: 40px;
+      border-radius: 10px;
+      background: linear-gradient(135deg, #38bdf8, #a78bfa);
+      display: grid;
+      place-items: center;
+      font-weight: 800;
+      color: #0b1221;
     }
 
     main {
-      padding: 16px 24px 48px;
+      padding: 24px 32px 48px;
       display: grid;
-      gap: 16px;
-      grid-template-columns: 320px 1fr 360px;
+      grid-template-columns: 300px 1fr;
+      gap: 24px;
+    }
+
+    @media (max-width: 1024px) {
+      main {
+        grid-template-columns: 1fr;
+      }
     }
 
     .panel {
-      background: var(--panel);
+      background: linear-gradient(180deg, rgba(31, 41, 55, 0.95), rgba(17, 24, 39, 0.95));
       border: 1px solid var(--border);
       border-radius: var(--radius);
-      padding: 16px;
-      box-shadow: 0 12px 32px rgba(0, 0, 0, 0.25);
+      padding: 18px 20px;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
     }
 
-    input, select, textarea, button {
-      font-family: inherit;
-      font-size: 14px;
+    h2 {
+      margin: 0 0 12px;
+      font-size: 20px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
     }
 
-    label { display: block; margin-bottom: 6px; font-weight: 600; color: #e2e8f0; }
+    h3 { margin: 12px 0 10px; }
+
+    label { display: block; color: var(--muted); margin-bottom: 6px; font-size: 14px; }
 
     input, select, textarea {
       width: 100%;
@@ -81,71 +103,108 @@
       background: var(--surface);
       border: 1px solid var(--border);
       border-radius: 10px;
-      color: #e5e7eb;
+      color: #f9fafb;
+      font-size: 14px;
+      transition: border-color 0.2s ease, box-shadow 0.2s ease;
     }
 
-    textarea { resize: vertical; }
+    input:focus, select:focus, textarea:focus {
+      outline: none;
+      border-color: #38bdf8;
+      box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.15);
+    }
 
-    button {
-      cursor: pointer;
+    textarea { resize: vertical; min-height: 80px; }
+
+    .button {
       border: none;
       border-radius: 10px;
       padding: 10px 14px;
       font-weight: 700;
-      color: #0b1224;
-      background: linear-gradient(120deg, #38bdf8, #60a5fa);
-      transition: transform 0.1s ease;
+      cursor: pointer;
+      transition: transform 0.1s ease, box-shadow 0.2s ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
     }
 
-    button.secondary { background: #1f2937; color: #e5e7eb; border: 1px solid var(--border); }
-    button:disabled { opacity: 0.6; cursor: not-allowed; }
-    button:hover { transform: translateY(-1px); }
-
-    .list {
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-      max-height: calc(100vh - 220px);
-      overflow-y: auto;
-      padding-right: 4px;
+    .button.primary {
+      background: linear-gradient(135deg, #38bdf8, #22d3ee);
+      color: #0b1221;
+      box-shadow: 0 10px 30px rgba(56, 189, 248, 0.3);
     }
 
-    .card {
+    .button.ghost { background: transparent; color: #e5e7eb; border: 1px solid var(--border); }
+
+    .button:hover { transform: translateY(-1px); }
+
+    .button:active { transform: translateY(0); }
+
+    .pill {
+      padding: 6px 10px;
+      border-radius: 999px;
+      background: rgba(56, 189, 248, 0.12);
+      border: 1px solid rgba(56, 189, 248, 0.25);
+      color: #e0f2fe;
+      font-weight: 600;
+      font-size: 12px;
+    }
+
+    .grid { display: grid; gap: 12px; }
+
+    .app-card {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 16px;
+      padding: 18px;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      background: linear-gradient(135deg, rgba(31, 41, 55, 0.85), rgba(17, 24, 39, 0.9));
+    }
+
+    .card-meta { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; color: var(--muted); font-size: 13px; }
+
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+      gap: 12px;
+      margin-top: 12px;
+    }
+
+    .stat {
+      padding: 12px;
+      border-radius: 10px;
       background: var(--surface);
       border: 1px solid var(--border);
-      border-radius: 12px;
-      padding: 12px;
-      display: grid;
-      gap: 6px;
-      cursor: pointer;
     }
 
-    .card.active { border-color: rgba(56, 189, 248, 0.6); box-shadow: 0 0 0 1px rgba(56, 189, 248, 0.4); }
-
-    .badge { background: rgba(34, 197, 94, 0.12); color: #bbf7d0; padding: 4px 8px; border-radius: 6px; font-weight: 600; font-size: 12px; }
-
-    .muted { color: var(--muted); font-size: 13px; }
-
-    .tag-row { display: flex; gap: 6px; flex-wrap: wrap; }
-    .tag { background: rgba(56, 189, 248, 0.12); color: #bae6fd; padding: 4px 8px; border-radius: 8px; font-size: 12px; border: 1px solid rgba(56, 189, 248, 0.18); }
-
-    .stat-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 10px; }
-    .stat { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 12px; }
     .stat strong { display: block; font-size: 18px; }
     .stat span { color: var(--muted); font-size: 13px; }
 
-    .alert { padding: 10px 12px; border-radius: 10px; font-size: 14px; border: 1px solid rgba(56, 189, 248, 0.25); background: rgba(56, 189, 248, 0.08); }
-    .alert.warn { background: rgba(234, 179, 8, 0.08); border-color: rgba(234, 179, 8, 0.4); color: #fef9c3; }
-    .alert.error { background: rgba(239, 68, 68, 0.08); border-color: rgba(239, 68, 68, 0.5); color: #fecdd3; }
+    .tag-row { display: flex; gap: 8px; flex-wrap: wrap; margin: 8px 0; }
+    .usage-tag {
+      padding: 6px 8px;
+      border-radius: 8px;
+      border: 1px dashed rgba(236, 72, 153, 0.4);
+      color: #fbcfe8;
+      background: rgba(236, 72, 153, 0.08);
+      font-size: 12px;
+    }
+
+    .alert { padding: 10px 12px; border-radius: 10px; font-size: 14px; }
+    .alert.info { background: rgba(56, 189, 248, 0.08); border: 1px solid rgba(56, 189, 248, 0.2); }
+    .alert.warn { background: rgba(234, 179, 8, 0.08); border: 1px solid rgba(234, 179, 8, 0.2); color: #fef9c3; }
 
     .divider { border-top: 1px solid var(--border); margin: 16px 0; }
 
-    .chart-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 12px; }
-
-    @media (max-width: 1100px) {
-      main { grid-template-columns: 1fr; }
-      .list { max-height: none; }
+    .chart-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 16px;
+      margin-top: 12px;
     }
+
+    .badge { background: rgba(34, 197, 94, 0.12); color: #bbf7d0; padding: 4px 8px; border-radius: 6px; font-weight: 600; font-size: 12px; }
   </style>
 </head>
 <body>
@@ -156,517 +215,507 @@
   <script src="https://unpkg.com/babel-standalone@6/babel.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
-  <!-- Use Babel in the browser to transpile JSX for the static demo -->
-  <script type="text/babel" data-presets="env,react">
-    const { useEffect, useMemo, useRef, useState } = React;
-    const API_BASE = window.API_BASE || '';
+  <script type="text/babel">
+    const { useMemo, useState, useEffect, useRef } = React;
 
-    const defaultNewApp = {
-      id: '',
-      name: '',
-      store: 'Core Engineering',
-      category: 'Engineering',
-      description: '',
-      tags: '',
-      downloadUrl: '',
-      updateInfo: '',
-    };
-
-    const fallbackApps = [
+    const seedApps = [
       {
-        id: 'atlas-schematic-designer',
-        name: 'Atlas Schematic Designer',
-        category: 'Engineering',
-        store: 'Core Engineering',
-        tags: ['PCB', 'Schematics', 'Simulation'],
-        description: 'Secure circuit design and simulation toolkit with change history.',
-        downloads: 240,
-        rating: 4.7,
-        ratingCount: 38,
-        feedback: [],
-        updateInfo: 'v2.3.1 – Export validation added',
-        lastUpdated: new Date('2024-02-02T00:00:00.000Z').toISOString(),
-        downloadUrl: 'https://example.com/downloads/atlas-schematic-designer.zip',
+        id: 1,
+        name: 'Telemetry Uploader',
+        category: 'Monitoring',
+        description: 'Secure agent used to upload device telemetry from field units to the central analytics store.',
+        usageFields: ['IoT', 'Field Ops'],
+        features: ['TLS 1.3 uploads', 'Offline queue with retry', 'Configurable data retention'],
+        downloadUrl: '#',
+        downloadCount: 189,
+        ratings: [5, 5, 4, 4, 5, 3],
+        lastUpdated: '2024-03-12',
+        version: '3.2.1',
+        suggestions: [
+          { role: 'viewer', message: 'Expose retry metrics via metrics endpoint.' },
+          { role: 'admin', message: 'Scheduled S3 vault rotation in May release.' },
+        ],
       },
       {
-        id: 'ops-automation-workbench',
-        name: 'Ops Automation Workbench',
-        category: 'Automation',
-        store: 'Operations',
-        tags: ['RPA', 'Scheduling', 'Compliance'],
-        description: 'Orchestrate runbooks, deploy agents, and audit changes.',
-        downloads: 180,
-        rating: 4.3,
-        ratingCount: 21,
-        feedback: [],
-        updateInfo: 'v1.9.0 – Linux agents added',
-        lastUpdated: new Date('2024-01-18T00:00:00.000Z').toISOString(),
-        downloadUrl: 'https://example.com/downloads/ops-automation-workbench.zip',
+        id: 2,
+        name: 'Secure Docs',
+        category: 'Productivity',
+        description: 'Encrypted internal documentation hub with granular RBAC support and watermarking.',
+        usageFields: ['PMO', 'Compliance'],
+        features: ['Classified project isolation', 'Version history', 'Watermarked PDFs'],
+        downloadUrl: '#',
+        downloadCount: 243,
+        ratings: [4, 4, 4, 5, 3],
+        lastUpdated: '2024-05-08',
+        version: '2.4.0',
+        suggestions: [
+          { role: 'viewer', message: 'Add dark mode toggle for readability.' },
+        ],
       },
       {
-        id: 'safety-inspection-suite',
-        name: 'Safety Inspection Suite',
-        category: 'Safety',
-        store: 'Field',
-        tags: ['Compliance', 'Field'],
-        description: 'Offline-ready checklists, site evidence capture, and approval routing.',
-        downloads: 120,
-        rating: 4.5,
-        ratingCount: 19,
-        feedback: [],
-        updateInfo: 'v3.0.0 – Photo annotations',
-        lastUpdated: new Date('2024-03-12T00:00:00.000Z').toISOString(),
-        downloadUrl: 'https://example.com/downloads/safety-inspection-suite.zip',
+        id: 3,
+        name: 'Release Portal',
+        category: 'DevOps',
+        description: 'One-click deployment portal for staging and production with signed artifact verification.',
+        usageFields: ['Engineering', 'SRE'],
+        features: ['Immutable build log', 'JWT-based sign-offs', 'Canary automation'],
+        downloadUrl: '#',
+        downloadCount: 122,
+        ratings: [5, 5, 5, 4],
+        lastUpdated: '2024-04-01',
+        version: '1.8.6',
+        suggestions: [
+          { role: 'viewer', message: 'Surface feature flags per environment.' },
+        ],
       },
     ];
 
-    const fetchJson = async (path, options = {}, auth = {}) => {
-      const headers = { 'Content-Type': 'application/json', ...(options.headers || {}) };
-      if (auth?.token) headers.Authorization = `Basic ${auth.token}`;
-      if (auth?.role) headers['x-user-role'] = auth.role;
+    const personaOptions = [
+      { value: 'viewer', label: 'Viewer' },
+      { value: 'admin', label: 'Admin' },
+    ];
 
-      const res = await fetch(`${API_BASE}${path}`, {
-        ...options,
-        headers,
-      });
-      const text = await res.text();
-      const data = text ? JSON.parse(text) : {};
-      if (!res.ok) throw new Error(data.error || res.statusText);
-      return data;
-    };
-
-    const Status = ({ status }) => {
-      if (!status) return null;
-      return <div className={`alert ${status.tone === 'error' ? 'error' : status.tone === 'warn' ? 'warn' : ''}`}>{status.message}</div>;
-    };
-
-    const Stats = ({ stats, apps }) => {
-      const barRef = useRef(null);
-      const pieRef = useRef(null);
-
-      useEffect(() => {
-        if (!stats || !barRef.current || !pieRef.current) return;
-        const barCtx = barRef.current.getContext('2d');
-        const pieCtx = pieRef.current.getContext('2d');
-
-        const downloads = apps.map((a) => a.downloads || 0);
-        const ratings = apps.map((a) => a.rating || 0);
-
-        const bar = new Chart(barCtx, {
-          type: 'bar',
-          data: {
-            labels: apps.map((a) => a.name),
-            datasets: [
-              { label: 'Downloads', backgroundColor: '#38bdf8', data: downloads },
-              { label: 'Rating', backgroundColor: '#a855f7', data: ratings },
-            ],
-          },
-          options: { responsive: true, plugins: { legend: { labels: { color: '#e5e7eb' } } }, scales: { x: { ticks: { color: '#e5e7eb' } }, y: { ticks: { color: '#e5e7eb' } } } },
-        });
-
-        const pie = new Chart(pieCtx, {
-          type: 'pie',
-          data: {
-            labels: Object.keys(stats.categoryBreakdown || {}),
-            datasets: [
-              {
-                data: Object.values(stats.categoryBreakdown || {}),
-                backgroundColor: ['#38bdf8', '#a855f7', '#22c55e', '#f59e0b', '#ec4899', '#6366f1'],
-              },
-            ],
-          },
-          options: { plugins: { legend: { labels: { color: '#e5e7eb' } } } },
-        });
-
-        return () => {
-          bar.destroy();
-          pie.destroy();
-        };
-      }, [stats, apps]);
-
-      return (
-        <div className="panel">
-          <h3 style={{ marginTop: 0 }}>Usage insights</h3>
-          <div className="stat-grid">
-            <div className="stat"><strong>{stats?.appCount || 0}</strong><span>Applications</span></div>
-            <div className="stat"><strong>{stats?.totalDownloads || 0}</strong><span>Downloads</span></div>
-            <div className="stat"><strong>{stats?.averageRating || 0}</strong><span>Avg rating</span></div>
-          </div>
-          <div className="chart-grid" style={{ marginTop: 12 }}>
-            <canvas ref={barRef} height="200"></canvas>
-            <canvas ref={pieRef} height="200"></canvas>
-          </div>
-        </div>
-      );
-    };
-
-    const StoreList = ({ stores, activeStore, onSelect, counts }) => (
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-        {['all', ...stores].map((store) => (
-          <button
-            key={store}
-            onClick={() => onSelect(store)}
-            className={store === activeStore ? '' : 'secondary'}
-            style={{ width: '100%', justifyContent: 'space-between', display: 'flex', alignItems: 'center' }}
-          >
-            <span>{store === 'all' ? 'All stores' : store}</span>
-            <span className="badge">{counts[store] || 0}</span>
-          </button>
-        ))}
-      </div>
-    );
-
-    const AppCard = ({ app, active, onSelect }) => (
-      <div className={`card ${active ? 'active' : ''}`} onClick={() => onSelect(app.id)}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-          <div>
-            <div style={{ fontWeight: 700 }}>{app.name}</div>
-            <div className="muted">{app.category} · {app.store}</div>
-          </div>
-          <div className="badge">{app.downloads || 0} downloads</div>
-        </div>
-        <div className="muted">{app.description}</div>
-        <div className="tag-row">{(app.tags || []).map((tag) => <span key={tag} className="tag">{tag}</span>)}</div>
-      </div>
-    );
-
-    const Detail = ({ app, persona, onDownload, feedback, onFeedbackChange, onSubmitFeedback }) => {
-      if (!app) return <div className="panel">Select an application to see details.</div>;
-      return (
-        <div className="panel">
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-            <div>
-              <h2 style={{ margin: '4px 0 0' }}>{app.name}</h2>
-              <div className="muted">{app.store} store · Updated {new Date(app.lastUpdated || Date.now()).toLocaleDateString()} · {app.updateInfo || 'Release notes pending'}</div>
-            </div>
-            <button onClick={() => onDownload(app.id)}>Download</button>
-          </div>
-          <p style={{ lineHeight: 1.6 }}>{app.description}</p>
-          <div className="tag-row">{(app.tags || []).map((tag) => <span key={tag} className="tag">{tag}</span>)}</div>
-          <div className="divider"></div>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 12 }}>
-            <div className="stat"><strong>{app.downloads || 0}</strong><span>Downloads</span></div>
-            <div className="stat"><strong>{app.rating || 0} / 5</strong><span>{app.ratingCount || 0} ratings</span></div>
-          </div>
-          <div className="divider"></div>
-          <form onSubmit={(e) => onSubmitFeedback(e, app.id)} style={{ display: 'grid', gap: 10 }}>
-            <label>Rate &amp; comment</label>
-            <div style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
-              <input type="number" min="1" max="5" step="1" value={feedback.rating} onChange={(e) => onFeedbackChange({ rating: Number(e.target.value) })} style={{ width: 90 }} />
-              <input type="text" placeholder="Your name" value={feedback.user} onChange={(e) => onFeedbackChange({ user: e.target.value })} />
-            </div>
-            <textarea rows="3" placeholder="Share a quick suggestion" value={feedback.comment} onChange={(e) => onFeedbackChange({ comment: e.target.value })}></textarea>
-            <button type="submit" disabled={!persona}>Submit feedback</button>
-          </form>
-          <div className="divider"></div>
-          <h4 style={{ margin: '0 0 8px' }}>Latest feedback</h4>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-            {(app.feedback || []).slice().reverse().slice(0, 6).map((entry, idx) => (
-              <div key={idx} className="card" style={{ cursor: 'default' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                  <strong>{entry.user}</strong>
-                  <span className="muted">{new Date(entry.createdAt).toLocaleString()}</span>
-                </div>
-                <div className="muted">{entry.persona}</div>
-                {entry.rating ? <div className="badge">Rated {entry.rating}/5</div> : null}
-                <div>{entry.comment}</div>
-              </div>
-            ))}
-          </div>
-        </div>
-      );
-    };
-
-    const LoginPanel = ({ onLogin, onLogout, session, busy }) => {
-      const [creds, setCreds] = useState({ username: '', password: '' });
-
-      const submit = (e, preset) => {
-        e.preventDefault();
-        onLogin(preset || creds);
-      };
-
-      return (
-        <div className="panel">
-          <h3 style={{ margin: '4px 0' }}>Sign in</h3>
-          <div className="muted">Admin can add apps; users can browse, sort, and rate.</div>
-          <div className="divider"></div>
-          <div style={{ display: 'grid', gap: 10 }}>
-            <div className="alert">Current session: <strong>{session.displayName}</strong> ({session.role || 'guest'})</div>
-            <form onSubmit={(e) => submit(e)} style={{ display: 'grid', gap: 8 }}>
-              <label>Username</label>
-              <input value={creds.username} onChange={(e) => setCreds({ ...creds, username: e.target.value })} placeholder="admin or user" required />
-              <label>Password</label>
-              <input type="password" value={creds.password} onChange={(e) => setCreds({ ...creds, password: e.target.value })} placeholder="••••••" required />
-              <button type="submit" disabled={busy}>Sign in</button>
-            </form>
-            <div style={{ display: 'grid', gap: 6, gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))' }}>
-              <button type="button" onClick={(e) => submit(e, { username: 'admin', password: 'admin123' })} disabled={busy}>Demo admin</button>
-              <button type="button" className="secondary" onClick={(e) => submit(e, { username: 'user', password: 'user123' })} disabled={busy}>Demo user</button>
-            </div>
-            <button type="button" className="secondary" onClick={onLogout} disabled={busy}>Sign out</button>
-          </div>
-        </div>
-      );
-    };
+    const average = (values = []) => values.length ? values.reduce((a, b) => a + b, 0) / values.length : 0;
 
     const App = () => {
-      const [session, setSession] = useState({ role: '', displayName: 'Guest', token: null });
-      const [filters, setFilters] = useState({ search: '', category: 'all', store: 'all', sort: 'name' });
-      const [apps, setApps] = useState([]);
-      const [categories, setCategories] = useState(['all']);
-      const [stores, setStores] = useState([]);
-      const [stats, setStats] = useState(null);
-      const [selectedAppId, setSelectedAppId] = useState(null);
-      const [newApp, setNewApp] = useState(defaultNewApp);
-      const [status, setStatus] = useState(null);
-      const [loading, setLoading] = useState(true);
-      const [feedback, setFeedback] = useState({ rating: 5, comment: '', user: 'anonymous' });
-      const [authBusy, setAuthBusy] = useState(false);
+      const [persona, setPersona] = useState('viewer');
+      const [apps, setApps] = useState(seedApps);
+      const [filters, setFilters] = useState({ search: '', category: 'all' });
+      const [newApp, setNewApp] = useState({ name: '', category: 'Monitoring', description: '', usageFields: '', features: '', downloadUrl: '' });
+      const [rating, setRating] = useState(5);
+      const [comment, setComment] = useState('');
+      const [selectedAppId, setSelectedAppId] = useState(seedApps[0].id);
+
+      const feedback = {
+        rating,
+        comment,
+        setRating,
+        setComment,
+        reset: () => {
+          setRating(5);
+          setComment('');
+        },
+      };
+
+      const categories = useMemo(() => ['all', ...new Set(apps.map((a) => a.category))], [apps]);
 
       const filteredApps = useMemo(() => {
-        const term = filters.search.toLowerCase();
-        return apps
-          .filter((app) => {
-            const matchesCategory = filters.category === 'all' || app.category === filters.category;
-            const matchesStore = filters.store === 'all' || (app.store || '').toLowerCase() === filters.store.toLowerCase();
-            const matchesSearch =
-              !term ||
-              app.name.toLowerCase().includes(term) ||
-              app.description.toLowerCase().includes(term) ||
-              (app.tags || []).some((t) => t.toLowerCase().includes(term));
-            return matchesCategory && matchesStore && matchesSearch;
-          })
-          .sort((a, b) => {
-            switch (filters.sort) {
-              case 'downloads':
-                return (b.downloads || 0) - (a.downloads || 0);
-              case 'rating':
-                return (b.rating || 0) - (a.rating || 0);
-              case 'updated':
-                return new Date(b.lastUpdated || 0) - new Date(a.lastUpdated || 0);
-              default:
-                return a.name.localeCompare(b.name);
-            }
-          });
+        const searchLower = filters.search.toLowerCase();
+        return apps.filter((app) => {
+          const matchesSearch =
+            app.name.toLowerCase().includes(searchLower) ||
+            app.description.toLowerCase().includes(searchLower) ||
+            app.usageFields.some((f) => f.toLowerCase().includes(searchLower));
+          const matchesCategory = filters.category === 'all' || app.category === filters.category;
+          return matchesSearch && matchesCategory;
+        });
       }, [apps, filters]);
 
-      const selectedApp = filteredApps.find((a) => a.id === selectedAppId) || filteredApps[0];
+      const selectedApp = apps.find((a) => a.id === selectedAppId) || apps[0];
 
-      const refresh = async (message) => {
-        setLoading(true);
-        try {
-          const [appsRes, categoriesRes, statsRes, storesRes] = await Promise.all([
-            fetchJson(`/api/apps?${new URLSearchParams({
-              q: filters.search || '',
-              category: filters.category === 'all' ? '' : filters.category,
-              store: filters.store === 'all' ? '' : filters.store,
-              sort: filters.sort,
-            })}`),
-            fetchJson('/api/categories', {}, session),
-            fetchJson('/api/stats', {}, session),
-            fetchJson('/api/stores', {}, session),
-          ]);
-          const appList = appsRes.apps || [];
-          setApps(appList);
-          setCategories(['all', ...(categoriesRes.categories || [])]);
-          setStores(storesRes.stores || []);
-          setStats(statsRes);
-          if (!selectedAppId && appList.length) setSelectedAppId(appList[0].id);
-          if (message) setStatus({ tone: 'info', message });
-        } catch (error) {
-          setStatus({ tone: 'warn', message: `${error.message} – showing demo data` });
-          setApps(fallbackApps);
-          setCategories(['all', ...new Set(fallbackApps.map((a) => a.category))]);
-          setStores([...new Set(fallbackApps.map((a) => a.store))]);
-          setStats({
-            appCount: fallbackApps.length,
-            totalDownloads: fallbackApps.reduce((sum, app) => sum + (app.downloads || 0), 0),
-            averageRating: 4.5,
-            categoryBreakdown: fallbackApps.reduce((acc, app) => {
-              acc[app.category] = (acc[app.category] || 0) + 1;
-              return acc;
-            }, {}),
-          });
-          if (!selectedAppId && fallbackApps.length) setSelectedAppId(fallbackApps[0].id);
-        } finally {
-          setLoading(false);
-        }
-      };
-
-      useEffect(() => {
-        refresh();
-      }, [session.role]);
-
-      const handleLogin = async (credentials) => {
-        setAuthBusy(true);
-        try {
-          const data = await fetchJson('/api/login', {
-            method: 'POST',
-            body: JSON.stringify(credentials),
-          });
-          setSession({ role: data.role, displayName: data.displayName, token: data.token });
-          setStatus({ tone: 'info', message: `Signed in as ${data.displayName}` });
-        } catch (error) {
-          setStatus({ tone: 'error', message: error.message });
-          setSession({ role: '', displayName: 'Guest', token: null });
-        } finally {
-          setAuthBusy(false);
-          refresh();
-        }
-      };
-
-      const handleLogout = () => {
-        setSession({ role: '', displayName: 'Guest', token: null });
-        setStatus({ tone: 'info', message: 'Signed out' });
-      };
-
-      const handleAddApp = async (e) => {
+      const handleAddApp = (e) => {
         e.preventDefault();
-        if (session.role !== 'admin') {
-          setStatus({ tone: 'error', message: 'Admin login required to add applications' });
-          return;
-        }
-        try {
-          await fetchJson('/api/apps', {
-            method: 'POST',
-            body: JSON.stringify({
-              id: newApp.id.trim() || newApp.name.trim().toLowerCase().replace(/\s+/g, '-'),
-              name: newApp.name.trim(),
-              category: newApp.category,
-              store: newApp.store,
-              description: newApp.description.trim(),
-              tags: newApp.tags.split(',').map((t) => t.trim()).filter(Boolean),
-              downloadUrl: newApp.downloadUrl.trim(),
-              updateInfo: newApp.updateInfo.trim(),
-            }),
-          }, session);
-          setNewApp(defaultNewApp);
-          await refresh('Application created');
-        } catch (error) {
-          setStatus({ tone: 'error', message: error.message });
-        }
+        if (!newApp.name.trim() || !newApp.description.trim()) return;
+        const id = Date.now();
+        const app = {
+          id,
+          name: newApp.name.trim(),
+          category: newApp.category,
+          description: newApp.description.trim(),
+          usageFields: newApp.usageFields.split(',').map((s) => s.trim()).filter(Boolean),
+          features: newApp.features.split(',').map((s) => s.trim()).filter(Boolean),
+          downloadUrl: newApp.downloadUrl || '#',
+          downloadCount: 0,
+          ratings: [],
+          lastUpdated: new Date().toISOString().slice(0, 10),
+          version: '1.0.0',
+          suggestions: [],
+        };
+        setApps((prev) => [app, ...prev]);
+        setNewApp({ name: '', category: 'Monitoring', description: '', usageFields: '', features: '', downloadUrl: '' });
+        setSelectedAppId(id);
       };
 
-      const handleFeedback = async (e, appId) => {
+      const handleFeedback = (e, appId) => {
         e.preventDefault();
-        if (!appId) return;
-        try {
-          await fetchJson(`/api/apps/${appId}/rate`, {
-            method: 'POST',
-            body: JSON.stringify({
-              rating: feedback.rating,
-              comment: feedback.comment,
-              user: feedback.user,
-              persona: session.role || 'viewer',
-            }),
-          });
-          setFeedback({ rating: 5, comment: '', user: 'anonymous' });
-          await refresh('Thanks for the feedback!');
-          setSelectedAppId(appId);
-        } catch (error) {
-          setStatus({ tone: 'error', message: error.message });
-        }
+        setApps((prev) =>
+          prev.map((app) =>
+            app.id === appId
+              ? {
+                  ...app,
+                  ratings: [...app.ratings, Number(rating)],
+                  suggestions: comment.trim()
+                    ? [...app.suggestions, { role: persona, message: comment.trim() }]
+                    : app.suggestions,
+                }
+              : app
+          )
+        );
+        feedback.reset();
       };
 
-      const handleDownload = async (appId) => {
-        try {
-          const res = await fetchJson(`/api/apps/${appId}/download`, { method: 'POST' });
-          await refresh();
-          if (res.downloadUrl) window.open(res.downloadUrl, '_blank');
-        } catch (error) {
-          setStatus({ tone: 'error', message: error.message });
-        }
+      const handleDownload = (appId) => {
+        setApps((prev) => prev.map((app) => (app.id === appId ? { ...app, downloadCount: app.downloadCount + 1 } : app)));
       };
 
-      const storeCounts = useMemo(() => {
-        return apps.reduce((acc, app) => {
-          acc[app.store || 'Main'] = (acc[app.store || 'Main'] || 0) + 1;
-          acc.all = (acc.all || 0) + 1;
-          return acc;
+      const stats = useMemo(() => {
+        const totalDownloads = apps.reduce((sum, app) => sum + app.downloadCount, 0);
+        const avgRating = average(apps.flatMap((a) => a.ratings));
+        const categoryCounts = apps.reduce((map, app) => {
+          map[app.category] = (map[app.category] || 0) + 1;
+          return map;
         }, {});
+        return { totalDownloads, avgRating, categoryCounts };
       }, [apps]);
 
       return (
         <>
           <header>
-            <div className="title">
-              <span style={{ width: 10, height: 10, background: '#38bdf8', borderRadius: '50%' }}></span>
-              Enterprise Application Manager
+            <div className="logo">
+              <div className="logo-badge">EA</div>
+              <div>
+                Enterprise Application Manager
+                <div style={{ color: 'var(--muted)', fontWeight: 500, fontSize: 13 }}>Secure discovery • Feedback-driven upgrades</div>
+              </div>
             </div>
-            <div className="muted">Secure catalog across stores · {session.displayName}</div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+              <span className="pill" style={{ background: persona === 'admin' ? 'rgba(34, 197, 94, 0.12)' : 'rgba(56, 189, 248, 0.12)', color: persona === 'admin' ? '#bbf7d0' : '#e0f2fe' }}>
+                {persona.charAt(0).toUpperCase() + persona.slice(1)} persona
+              </span>
+            </div>
           </header>
 
-          <main style={{ gridTemplateColumns: '360px 1fr 380px' }}>
-            <div style={{ display: 'grid', gap: 12 }}>
-              <LoginPanel onLogin={handleLogin} onLogout={handleLogout} session={session} busy={authBusy} />
-              <div className="panel">
-                <h3 style={{ marginTop: 4 }}>Browse catalog</h3>
-                <div style={{ display: 'grid', gap: 8 }}>
-                  <input placeholder="Search by name, description, or tag" value={filters.search} onChange={(e) => setFilters({ ...filters, search: e.target.value })} />
-                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 8 }}>
-                    <select value={filters.category} onChange={(e) => setFilters({ ...filters, category: e.target.value })}>
-                      {categories.map((c) => <option key={c} value={c}>{c}</option>)}
-                    </select>
-                    <select value={filters.sort} onChange={(e) => setFilters({ ...filters, sort: e.target.value })}>
-                      <option value="name">Sort: name</option>
-                      <option value="downloads">Sort: downloads</option>
-                      <option value="rating">Sort: rating</option>
-                      <option value="updated">Sort: updated</option>
-                    </select>
+          <main>
+            <Controls
+              persona={persona}
+              setPersona={setPersona}
+              filters={filters}
+              setFilters={setFilters}
+              categories={categories}
+              newApp={newApp}
+              setNewApp={setNewApp}
+              onAddApp={handleAddApp}
+              stats={stats}
+            />
+            <Catalog
+              persona={persona}
+              apps={filteredApps}
+              allApps={apps}
+              selectedAppId={selectedAppId}
+              onSelectApp={setSelectedAppId}
+              onDownload={handleDownload}
+              onFeedback={handleFeedback}
+              feedback={feedback}
+            />
+          </main>
+        </>
+      );
+    };
+
+    const Controls = ({ persona, setPersona, filters, setFilters, categories, newApp, setNewApp, onAddApp, stats }) => {
+      const handleChange = (field) => (e) => setNewApp((prev) => ({ ...prev, [field]: e.target.value }));
+
+      return (
+        <div className="grid" style={{ gap: 16 }}>
+          <div className="panel" style={{ padding: 0 }}>
+            <div style={{ padding: '16px 18px', borderBottom: '1px solid var(--border)' }}>
+              <h2>Controls</h2>
+            </div>
+            <div style={{ padding: '14px 18px' }}>
+              <div className="grid" style={{ gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+                <div>
+                  <label>Persona</label>
+                  <select value={persona} onChange={(e) => setPersona(e.target.value)}>
+                    {personaOptions.map((option) => (
+                      <option key={option.value} value={option.value}>
+                        {option.label}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+                <div>
+                  <label>Category filter</label>
+                  <select value={filters.category} onChange={(e) => setFilters((prev) => ({ ...prev, category: e.target.value }))}>
+                    {categories.map((c) => (
+                      <option key={c} value={c}>
+                        {c === 'all' ? 'All categories' : c}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+              <label style={{ marginTop: 12 }}>Search</label>
+              <input
+                placeholder="Search by name, description, or usage field"
+                value={filters.search}
+                onChange={(e) => setFilters((prev) => ({ ...prev, search: e.target.value }))}
+              />
+            </div>
+            <div className="divider" />
+            <div style={{ padding: '14px 18px' }}>
+              <h3 style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 0 }}>
+                Stats
+                <span className="badge">Real-time</span>
+              </h3>
+              <div className="stats">
+                <div className="stat">
+                  <strong>{stats.totalDownloads}</strong>
+                  <span>Total downloads</span>
+                </div>
+                <div className="stat">
+                  <strong>{average(Object.values(stats.categoryCounts)).toFixed(1)}</strong>
+                  <span>Avg apps per category</span>
+                </div>
+                <div className="stat">
+                  <strong>{stats.avgRating ? stats.avgRating.toFixed(1) : '—'}</strong>
+                  <span>Overall rating</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {persona === 'admin' && (
+            <div className="panel">
+              <h2>Admin • Add application</h2>
+              <form className="grid" style={{ gap: 10 }} onSubmit={onAddApp}>
+                <div>
+                  <label>Name</label>
+                  <input value={newApp.name} onChange={handleChange('name')} placeholder="e.g., Compliance Toolkit" required />
+                </div>
+                <div>
+                  <label>Category</label>
+                  <select value={newApp.category} onChange={handleChange('category')}>
+                    <option>Monitoring</option>
+                    <option>Productivity</option>
+                    <option>DevOps</option>
+                    <option>Security</option>
+                    <option>Data</option>
+                  </select>
+                </div>
+                <div>
+                  <label>Description</label>
+                  <textarea value={newApp.description} onChange={handleChange('description')} placeholder="What problem does it solve?" required />
+                </div>
+                <div>
+                  <label>Usage fields (comma separated)</label>
+                  <input value={newApp.usageFields} onChange={handleChange('usageFields')} placeholder="Compliance, Finance" />
+                </div>
+                <div>
+                  <label>Feature highlights (comma separated)</label>
+                  <input value={newApp.features} onChange={handleChange('features')} placeholder="Audit log, RBAC" />
+                </div>
+                <div>
+                  <label>Download URL</label>
+                  <input value={newApp.downloadUrl} onChange={handleChange('downloadUrl')} placeholder="https://..." />
+                </div>
+                <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
+                  <button className="button primary" type="submit">
+                    Add application
+                  </button>
+                </div>
+              </form>
+              <div className="alert info" style={{ marginTop: 12 }}>
+                Tip: Categories and usage fields help new joiners find the right app without searching shared drives.
+              </div>
+            </div>
+          )}
+        </div>
+      );
+    };
+
+    const Catalog = ({ persona, apps, allApps, selectedAppId, onSelectApp, onDownload, onFeedback, feedback }) => {
+      const chartRef = useRef(null);
+      const ratingChartRef = useRef(null);
+
+      useEffect(() => {
+        const ctx = chartRef.current.getContext('2d');
+        const ratingCtx = ratingChartRef.current.getContext('2d');
+
+        const downloadChart = new Chart(ctx, {
+          type: 'bar',
+          data: {
+            labels: allApps.map((a) => a.name),
+            datasets: [
+              {
+                label: 'Downloads',
+                data: allApps.map((a) => a.downloadCount),
+                backgroundColor: 'rgba(56, 189, 248, 0.6)',
+                borderColor: 'rgba(56, 189, 248, 1)',
+                borderWidth: 1,
+              },
+            ],
+          },
+          options: { plugins: { legend: { labels: { color: '#e5e7eb' } } }, scales: { x: { ticks: { color: '#9ca3af' } }, y: { ticks: { color: '#9ca3af' } } } },
+        });
+
+        const ratingChart = new Chart(ratingCtx, {
+          type: 'line',
+          data: {
+            labels: allApps.map((a) => a.name),
+            datasets: [
+              {
+                label: 'Average rating',
+                data: allApps.map((a) => average(a.ratings)),
+                borderColor: 'rgba(167, 139, 250, 1)',
+                backgroundColor: 'rgba(167, 139, 250, 0.2)',
+                tension: 0.3,
+              },
+            ],
+          },
+          options: { plugins: { legend: { labels: { color: '#e5e7eb' } } }, scales: { x: { ticks: { color: '#9ca3af' } }, y: { ticks: { color: '#9ca3af' }, suggestedMin: 0, suggestedMax: 5 } } },
+        });
+
+        return () => {
+          downloadChart.destroy();
+          ratingChart.destroy();
+        };
+      }, [allApps]);
+
+      return (
+        <div className="grid" style={{ gap: 14 }}>
+          <div className="panel">
+            <h2>Catalog</h2>
+            <div className="grid" style={{ gap: 12 }}>
+              {apps.length === 0 && <div className="alert warn">No applications found. Try clearing filters.</div>}
+              {apps.map((app) => (
+                <div key={app.id} className="app-card">
+                  <div>
+                    <div className="card-meta">
+                      <span className="pill">{app.category}</span>
+                      <span>Updated {app.lastUpdated}</span>
+                      <span>v{app.version}</span>
+                    </div>
+                    <h3 style={{ margin: '4px 0' }}>{app.name}</h3>
+                    <p style={{ margin: '6px 0', color: '#d1d5db', lineHeight: 1.5 }}>{app.description}</p>
+                    <div className="tag-row">
+                      {app.usageFields.map((field) => (
+                        <span key={field} className="usage-tag">{field}</span>
+                      ))}
+                    </div>
+                    <div style={{ color: '#a5b4fc', fontSize: 13, margin: '6px 0' }}>
+                      Features: {app.features.join(' • ')}
+                    </div>
+                    <div className="stats">
+                      <div className="stat">
+                        <strong>{app.downloadCount}</strong>
+                        <span>Downloads</span>
+                      </div>
+                      <div className="stat">
+                        <strong>{average(app.ratings).toFixed(1) || '—'}</strong>
+                        <span>Avg rating</span>
+                      </div>
+                    </div>
+                    <div style={{ marginTop: 10 }}>
+                      <button className="button primary" onClick={() => onDownload(app.id)}>
+                        Download
+                      </button>
+                      <button className="button ghost" style={{ marginLeft: 8 }} onClick={() => onSelectApp(app.id)}>
+                        View feedback
+                      </button>
+                    </div>
+                  </div>
+                  <div style={{ display: 'grid', gap: 10, justifyItems: 'end' }}>
+                    <div className="badge">{app.category}</div>
+                    <div style={{ textAlign: 'right', color: var(--muted) }}>
+                      <div style={{ fontSize: 12 }}>Release</div>
+                      <div style={{ fontWeight: 700 }}>{app.lastUpdated}</div>
+                    </div>
                   </div>
                 </div>
-                <div className="divider"></div>
-                <h4 style={{ margin: '0 0 8px' }}>Stores</h4>
-                <StoreList stores={stores} activeStore={filters.store} onSelect={(store) => setFilters({ ...filters, store })} counts={storeCounts} />
-                <div className="divider"></div>
-                {loading ? <div className="muted">Loading applications…</div> : null}
-                <div className="list">
-                  {filteredApps.map((app) => (
-                    <AppCard key={app.id} app={app} active={selectedAppId === app.id} onSelect={setSelectedAppId} />
-                  ))}
-                  {!filteredApps.length && !loading ? <div className="muted">No apps match your filters.</div> : null}
+              ))}
+            </div>
+          </div>
+
+          {selectedAppId && (
+            <div className="panel">
+              <Detail
+                app={allApps.find((a) => a.id === selectedAppId)}
+                persona={persona}
+                feedback={feedback}
+                onFeedback={onFeedback}
+              />
+            </div>
+          )}
+
+          <div className="panel">
+            <h2>Insights</h2>
+            <div className="chart-grid">
+              <canvas ref={chartRef} height="180"></canvas>
+              <canvas ref={ratingChartRef} height="180"></canvas>
+            </div>
+          </div>
+        </div>
+      );
+    };
+
+    const Detail = ({ app, persona, feedback, onFeedback }) => {
+      if (!app) return null;
+
+      return (
+        <div className="grid" style={{ gap: 12 }}>
+          <div>
+            <div className="card-meta" style={{ marginBottom: 4 }}>
+              <span className="pill">{app.category}</span>
+              <span>Last updated {app.lastUpdated}</span>
+              <span>v{app.version}</span>
+              <span>{app.downloadCount} downloads</span>
+            </div>
+            <h2 style={{ margin: '6px 0 6px' }}>{app.name}</h2>
+            <p style={{ color: '#d1d5db', lineHeight: 1.5 }}>{app.description}</p>
+            <div className="tag-row">
+              {app.usageFields.map((field) => (
+                <span key={field} className="usage-tag">{field}</span>
+              ))}
+            </div>
+            <div style={{ color: '#a5b4fc', fontSize: 13 }}>Features: {app.features.join(' • ')}</div>
+          </div>
+
+          <div className="divider" />
+
+          <div>
+            <h3>User feedback</h3>
+            <div className="grid" style={{ gap: 8 }}>
+              {app.suggestions.length === 0 && <div className="alert info">No feedback yet. Be the first to leave a note.</div>}
+              {app.suggestions.map((s, idx) => (
+                <div key={idx} className="alert" style={{ background: 'rgba(79, 70, 229, 0.08)', border: '1px solid rgba(79, 70, 229, 0.3)' }}>
+                  <strong style={{ textTransform: 'capitalize' }}>{s.role}</strong>: {s.message}
                 </div>
-              </div>
+              ))}
             </div>
+          </div>
 
-            <Detail
-              app={selectedApp}
-              persona={session.role}
-              onDownload={handleDownload}
-              feedback={feedback}
-              onFeedbackChange={(p) => setFeedback((prev) => ({ ...prev, ...p }))}
-              onSubmitFeedback={handleFeedback}
-            />
+          <div className="divider" />
 
-            <div style={{ display: 'grid', gap: 12 }}>
-              <div className="panel">
-                <h3 style={{ marginTop: 4 }}>Admin: add an application</h3>
-                <form onSubmit={handleAddApp} style={{ display: 'grid', gap: 10 }}>
-                  <label>Display name</label>
-                  <input value={newApp.name} onChange={(e) => setNewApp({ ...newApp, name: e.target.value })} placeholder="Telemetry Uploader" required />
-                  <label>Unique id (optional)</label>
-                  <input value={newApp.id} onChange={(e) => setNewApp({ ...newApp, id: e.target.value })} placeholder="telemetry-uploader" />
-                  <label>Store</label>
-                  <input value={newApp.store} onChange={(e) => setNewApp({ ...newApp, store: e.target.value })} placeholder="Core Engineering" required />
-                  <label>Category</label>
-                  <input value={newApp.category} onChange={(e) => setNewApp({ ...newApp, category: e.target.value })} placeholder="Engineering" />
-                  <label>Description</label>
-                  <textarea rows="3" value={newApp.description} onChange={(e) => setNewApp({ ...newApp, description: e.target.value })} required></textarea>
-                  <label>Tags (comma separated)</label>
-                  <input value={newApp.tags} onChange={(e) => setNewApp({ ...newApp, tags: e.target.value })} placeholder="RPA, Compliance" />
-                  <label>Download URL</label>
-                  <input value={newApp.downloadUrl} onChange={(e) => setNewApp({ ...newApp, downloadUrl: e.target.value })} placeholder="https://…" required />
-                  <label>Update info</label>
-                  <input value={newApp.updateInfo} onChange={(e) => setNewApp({ ...newApp, updateInfo: e.target.value })} placeholder="v2.0 – Adds offline sync" />
-                  <button type="submit" disabled={session.role !== 'admin'}>Create app</button>
-                  <div className="alert warn">Log in as admin to submit. Default admin: admin / admin123</div>
-                </form>
+          <div>
+            <h3>{persona === 'admin' ? 'Log update or response' : 'Leave a rating & suggestion'}</h3>
+            <form className="grid" style={{ gap: 10 }} onSubmit={(e) => onFeedback(e, app.id)}>
+              <div>
+                <label>Rating</label>
+                <select value={feedback.rating} onChange={(e) => feedback.setRating(Number(e.target.value))}>
+                  {[1, 2, 3, 4, 5].map((n) => (
+                    <option key={n} value={n}>
+                      {n} star{n > 1 ? 's' : ''}
+                    </option>
+                  ))}
+                </select>
               </div>
-              <Stats stats={stats} apps={apps} />
-            </div>
-          </main>
-          <div style={{ padding: '0 24px 32px' }}><Status status={status} /></div>
-        </>
+              <div>
+                <label>{persona === 'admin' ? 'Update or mitigation note' : 'Suggestion'}</label>
+                <textarea
+                  value={feedback.comment}
+                  onChange={(e) => feedback.setComment(e.target.value)}
+                  placeholder="Share deployment status, rollout notes, or UX suggestions"
+                />
+              </div>
+              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8 }}>
+                <button className="button ghost" type="button" onClick={feedback.reset}>Clear</button>
+                <button className="button primary" type="submit">
+                  Submit
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
       );
     };
 

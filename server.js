@@ -7,21 +7,6 @@ const store = require('./src/dataStore');
 const PORT = process.env.PORT || 3001;
 const app = express();
 
-const USERS = [
-  {
-    username: process.env.ADMIN_USERNAME || 'admin',
-    password: process.env.ADMIN_PASSWORD || 'admin123',
-    role: 'admin',
-    displayName: 'Admin',
-  },
-  {
-    username: process.env.VIEWER_USERNAME || 'user',
-    password: process.env.VIEWER_PASSWORD || 'user123',
-    role: 'viewer',
-    displayName: 'Viewer',
-  },
-];
-
 app.use(helmet());
 app.use(cors());
 app.use(express.json({ limit: '1mb' }));
@@ -37,8 +22,8 @@ app.get('/health', (_req, res) => {
 });
 
 app.get('/api/apps', async (req, res) => {
-  const { category, tag, q, store: storeId, sort } = req.query;
-  const apps = await store.listApps({ category, tag, q, store: storeId, sort });
+  const { category, tag, q } = req.query;
+  const apps = await store.listApps({ category, tag, q });
   res.json({ apps });
 });
 
@@ -60,22 +45,20 @@ app.post('/api/apps', async (req, res) => {
     id,
     name,
     category,
-    store,
     tags = [],
     description = '',
     downloadUrl,
     updateInfo = '',
   } = req.body || {};
 
-  if (!id || !name || !downloadUrl || !store) {
-    return res.status(400).json({ error: 'id, name, downloadUrl, and store are required' });
+  if (!id || !name || !downloadUrl) {
+    return res.status(400).json({ error: 'id, name, and downloadUrl are required' });
   }
 
   const result = await store.createApp({
     id,
     name,
     category,
-    store,
     tags,
     description,
     downloadUrl,
@@ -136,29 +119,9 @@ app.get('/api/categories', async (_req, res) => {
   res.json({ categories });
 });
 
-app.get('/api/stores', async (_req, res) => {
-  const stores = await store.listStores();
-  res.json({ stores });
-});
-
 app.get('/api/stats', async (_req, res) => {
   const stats = await store.getStats();
   res.json(stats);
-});
-
-app.post('/api/login', (req, res) => {
-  const { username, password } = req.body || {};
-  const user = USERS.find((u) => u.username === username && u.password === password);
-  if (!user) {
-    return res.status(401).json({ error: 'Invalid credentials' });
-  }
-
-  const token = Buffer.from(`${user.username}:${user.role}`).toString('base64');
-  res.json({
-    token,
-    role: user.role,
-    displayName: user.displayName,
-  });
 });
 
 app.get('/', (_req, res) => {
